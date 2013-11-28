@@ -16,6 +16,7 @@
 package com.nkt.geomessenger;
 
 import java.util.Properties;
+
 import android.util.Log;
 
 public class PropertyLoader {

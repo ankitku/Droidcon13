@@ -6,16 +6,18 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.LinearLayout;
 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.GoogleMap;
@@ -30,12 +32,15 @@ import com.intel.identity.webview.service.OAuthSyncManager;
  * @author durantea
  * 
  */
-public class CallbackFragmentActivity extends FragmentActivity {
+public class CallbackFragmentActivity extends SherlockFragmentActivity {
 
 	private View mResult;
 	private View mProgress;
-	private Button btnLogout;
 	private LinearLayout bottomView;
+	private Handler handler;
+
+
+	protected MenuItem action_signout, menu_legalnotices;
 
 	protected GoogleMap mapFragment;
 	Animation animateBottomViewOut, animateBottomViewIn;
@@ -106,6 +111,11 @@ public class CallbackFragmentActivity extends FragmentActivity {
 		mProgress = findViewById(R.id.pg_loading);
 		mResult = findViewById(R.id.ly_result);
 		bottomView = (LinearLayout) findViewById(R.id.bottom_view);
+
+		getSupportActionBar().setHomeButtonEnabled(true);
+		getSupportActionBar().setDisplayShowTitleEnabled(true);
+		
+		handler = new Handler();
 	}
 
 	private void initAnimations() {
@@ -120,7 +130,7 @@ public class CallbackFragmentActivity extends FragmentActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.callback_activity);
 		createUIElements();
-		
+
 		GeoMessenger.isGooglePlayServicesAvailable = servicesConnected();
 
 		if (GeoMessenger.isGooglePlayServicesAvailable) { // activity specific
@@ -133,17 +143,6 @@ public class CallbackFragmentActivity extends FragmentActivity {
 
 			initAnimations();
 		}
-
-		btnLogout = (Button) findViewById(R.id.btn_logout);
-		btnLogout.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View arg0) {
-				LogoutAsync async = new LogoutAsync();
-				async.execute();
-			}
-
-		});
 
 		final Uri uri = getIntent().getData();
 		String authorizationCode = null;
@@ -243,5 +242,44 @@ public class CallbackFragmentActivity extends FragmentActivity {
 			finish();
 		}
 	}
+	
+	
+	public void showFields(View v)
+	{
+		bottomView.startAnimation(animateBottomViewOut);
 
+		handler.postDelayed(new Runnable() {
+
+			@Override
+			public void run() {
+				runOnUiThread(new Runnable() {
+
+					@Override
+					public void run() {
+						bottomView.startAnimation(animateBottomViewIn);
+					}
+				});
+			}
+		}, 400);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getSupportMenuInflater();
+		inflater.inflate(R.menu.action_main, menu);
+		action_signout = (MenuItem) menu.findItem(R.id.action_signout);
+		menu_legalnotices = (MenuItem) menu.findItem(R.id.menu_legalnotices);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.action_signout:
+			LogoutAsync async = new LogoutAsync();
+			async.execute();
+			break;
+		}
+		return super.onOptionsItemSelected(item);
+	}
 }

@@ -13,6 +13,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.intel.identity.webview.service.AuthDataPreferences;
+import com.nkt.geomessenger.map.CustomerLocationUpdater;
 
 public class LoginFragmentActivity extends FragmentActivity {
 
@@ -22,6 +23,11 @@ public class LoginFragmentActivity extends FragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+		if (GeoMessenger.customerLocationUpdateHandler == null)
+			GeoMessenger.customerLocationUpdateHandler = new CustomerLocationUpdater();
+
+		GeoMessenger.customerLocationUpdateHandler.start(LoginFragmentActivity.this);
 
 		btnSignIn = (ImageButton) findViewById(R.id.btn_sign_in);
 		btnSignIn.setOnClickListener(new OnClickListener() {

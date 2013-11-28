@@ -20,10 +20,14 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
 import com.intel.identity.webview.service.AuthDataPreferences;
 import com.intel.identity.webview.service.OAuthSyncManager;
+import com.nkt.geomessenger.constants.Constants;
+import com.nkt.geomessenger.map.CustomerLocationUpdater;
 
 /**
  * Callback Activity that is started from the web view activity or manually. It
@@ -116,6 +120,12 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 		getSupportActionBar().setDisplayShowTitleEnabled(true);
 		
 		handler = new Handler();
+		
+		if (GeoMessenger.customerLocationUpdateHandler == null)
+			GeoMessenger.customerLocationUpdateHandler = new CustomerLocationUpdater();
+
+		GeoMessenger.customerLocationUpdateHandler.start(CallbackFragmentActivity.this);
+
 	}
 
 	private void initAnimations() {
@@ -161,6 +171,22 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 		// get the user profile
 		GetProfileAsync async = new GetProfileAsync();
 		async.execute(authorizationCode);
+	}
+	
+	@Override
+	protected void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		
+		handler.post(new Runnable() {
+			
+			@Override
+			public void run() {
+				
+				centerMap();
+				handler.postDelayed(this, 4*Constants.MILLIS_IN_A_SECOND);
+			}
+		});
 	}
 
 	protected void setUpMapIfNeeded() {
@@ -262,6 +288,14 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 			}
 		}, 400);
 	}
+	
+	protected void centerMap() {
+			if (GeoMessenger.customerLocation != null) {
+				LatLng p = new LatLng(GeoMessenger.customerLocation.getLatitude(),
+						GeoMessenger.customerLocation.getLongitude());
+				mapFragment.moveCamera(CameraUpdateFactory.newLatLngZoom(p, 16));
+			}
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -281,5 +315,12 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 			break;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+	
+	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
+		GeoMessenger.customerLocationUpdateHandler.stop();
 	}
 }

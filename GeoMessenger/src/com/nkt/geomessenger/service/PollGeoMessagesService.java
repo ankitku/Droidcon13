@@ -15,6 +15,8 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.nkt.geomessenger.GeoMessenger;
 import com.nkt.geomessenger.constants.Constants;
 import com.nkt.geomessenger.constants.UrlConstants;
+import com.nkt.geomessenger.model.GsonConvertibleObject;
+import com.nkt.geomessenger.model.Result;
 
 public class PollGeoMessagesService extends IntentService {
 
@@ -46,7 +48,7 @@ public class PollGeoMessagesService extends IntentService {
 				try {
 					request.put("lat", GeoMessenger.customerLocation.getLatitude());
 					request.put("lng", GeoMessenger.customerLocation.getLongitude());
-					request.put("radiusInMeter", 1000);
+					request.put("radiusInMeter", 6000);
 					request.put("userEmail", GeoMessenger.userEmail);
 
 					jsonObjectRequest.put("action", "query-radius-user");
@@ -65,18 +67,21 @@ public class PollGeoMessagesService extends IntentService {
 							@Override
 							public void onResponse(JSONObject response) {
 								result = Activity.RESULT_OK;
+								String jsonrep = response.toString();
+								GeoMessenger.geoMessages = GsonConvertibleObject.getObjectFromJson(jsonrep, Result.class);
+								publishResults(result);
 							}
 						}, new Response.ErrorListener() {
 
 							@Override
 							public void onErrorResponse(VolleyError error) {
+								publishResults(result);
 							}
 
 						});
 				
 				GeoMessenger.queue.add(jsonGeoMessagesRequest);
 
-				publishResults(result);
 				handler.postDelayed(this, 5 * Constants.MILLIS_IN_A_SECOND);
 			}
 		});

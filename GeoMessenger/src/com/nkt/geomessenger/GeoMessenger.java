@@ -6,6 +6,7 @@ import com.android.volley.RequestQueue;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.nkt.geomessenger.map.CustomerLocationUpdater;
+import com.nkt.geomessenger.model.Result;
 
 public class GeoMessenger {
 
@@ -25,4 +26,6 @@ public class GeoMessenger {
 	public static Location customerLocation;
 
 	public static CustomerLocationUpdater customerLocationUpdateHandler;
+	
+	public static Result geoMessages;
 }

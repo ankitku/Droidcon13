@@ -50,6 +50,23 @@
                     android:textIsSelectable="false"
                     android:textSize="20sp" />
 
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top"
+                    android:layout_weight="0"
+                    android:text="@string/title_profile"
+                    android:textIsSelectable="false"
+                    android:textSize="20sp" />
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
                 <Button
                     android:id="@+id/btn_save"
                     android:layout_width="match_parent"

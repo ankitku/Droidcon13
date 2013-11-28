@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Map;
 
 public class Result extends GsonConvertibleObject{
-	private List<Map<String,String>> result;
+	private List<GeoMessage> result;
 
-	public List<Map<String, String>> getResult() {
+	public List<GeoMessage> getResult() {
 		return result;
 	}
 }

@@ -1,5 +1,9 @@
 package com.nkt.geomessenger;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -21,16 +25,26 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.Request.Method;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.intel.identity.webview.service.AuthDataPreferences;
 import com.intel.identity.webview.service.OAuthSyncManager;
 import com.nkt.geomessenger.constants.Constants;
+import com.nkt.geomessenger.constants.UrlConstants;
 import com.nkt.geomessenger.map.CustomerLocationUpdater;
+import com.nkt.geomessenger.model.GeoMessage;
+import com.nkt.geomessenger.model.GsonConvertibleObject;
+import com.nkt.geomessenger.model.Result;
 import com.nkt.geomessenger.service.PollGeoMessagesService;
 
 /**
@@ -57,10 +71,20 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 						.getString(PollGeoMessagesService.FILEPATH);
 				int resultCode = bundle.getInt(PollGeoMessagesService.RESULT);
 				if (resultCode == RESULT_OK) {
-					Toast.makeText(CallbackFragmentActivity.this,
-							"Download complete. Download URI: " + string,
-							Toast.LENGTH_LONG).show();
-					// show on map
+					mapFragment.clear();
+					if (GeoMessenger.geoMessages != null) {
+						for (GeoMessage gm : GeoMessenger.geoMessages.getResult()) {
+							LatLng p = new LatLng(Double.parseDouble(gm
+									.getLatitude()), Double.parseDouble(gm
+									.getLongitude()));
+							Marker m = mapFragment.addMarker(new MarkerOptions()
+									.position(p)
+									.title(gm.getFromName() + " ( "
+											+ gm.getFromEmail() + " ) " + " says: ")
+									.snippet(gm.getGeoMessage()));
+							m.showInfoWindow();
+						}
+					}
 				}
 			}
 		}
@@ -169,7 +193,8 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 		if (GeoMessenger.isGooglePlayServicesAvailable) { // activity specific
 															// map needs
 			setUpMapIfNeeded();
-
+			
+			mapFragment.getUiSettings().setCompassEnabled(true);
 			mapFragment.setMyLocationEnabled(true);
 			mapFragment.getUiSettings().setMyLocationButtonEnabled(false);
 			mapFragment.getUiSettings().setAllGesturesEnabled(true);
@@ -200,25 +225,27 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 	protected void onResume() {
 		// TODO Auto-generated method stub
 		super.onResume();
-	    registerReceiver(receiver, new IntentFilter(PollGeoMessagesService.NOTIFICATION));
+		registerReceiver(receiver, new IntentFilter(
+				PollGeoMessagesService.NOTIFICATION));
 
+		// update messages on map
 		handler.post(new Runnable() {
 
 			@Override
 			public void run() {
 
 				centerMap();
-				handler.postDelayed(this, 4 * Constants.MILLIS_IN_A_SECOND);
+				//handler.postDelayed(this, 4 * Constants.MILLIS_IN_A_SECOND);
 			}
 		});
 	}
-	
+
 	@Override
 	protected void onPause() {
 		// TODO Auto-generated method stub
 		super.onPause();
-		GeoMessenger.customerLocationUpdateHandler.stop();
-	    unregisterReceiver(receiver);
+		// GeoMessenger.customerLocationUpdateHandler.stop();
+		unregisterReceiver(receiver);
 	}
 
 	protected void setUpMapIfNeeded() {
@@ -257,7 +284,7 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 				String[] details = text.split("\n");
 				GeoMessenger.userEmail = details[0];
 				GeoMessenger.userName = details[1];
-				
+
 				startService();
 			}
 
@@ -269,11 +296,10 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 			super.onPostExecute(result);
 		}
 	}
-	
-	private void startService()
-	{
+
+	private void startService() {
 		Intent intent = new Intent(this, PollGeoMessagesService.class);
-	    startService(intent);
+		startService(intent);
 	}
 
 	/**
@@ -325,6 +351,46 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 				});
 			}
 		}, 400);
+	}
+
+	private void sendMessage(String email, String msg) {
+		JSONObject jsonObjectRequest = new JSONObject();
+		JSONObject request = new JSONObject();
+		try {
+			request.put("lat", GeoMessenger.customerLocation.getLatitude());
+			request.put("lng", GeoMessenger.customerLocation.getLongitude());
+			request.put("geoMsg", msg);
+			request.put("fromEmail", GeoMessenger.userEmail);
+			request.put("fromName", GeoMessenger.userName);
+			request.put("toEmail", email);
+
+			jsonObjectRequest.put("action", "put-point");
+			jsonObjectRequest.put("request", request);
+			
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+
+		JsonObjectRequest jsonGeoMessagesRequest = new JsonObjectRequest(
+				Method.POST, UrlConstants.getBaseUrl(),
+				jsonObjectRequest, new Response.Listener<JSONObject>() {
+
+					@Override
+					public void onResponse(JSONObject response) {
+						String jsonrep = response.toString();
+						GeoMessenger.geoMessages = GsonConvertibleObject.getObjectFromJson(jsonrep, Result.class);
+					}
+				}, new Response.ErrorListener() {
+
+					@Override
+					public void onErrorResponse(VolleyError error) {
+					}
+
+				});
+		
+		GeoMessenger.queue.add(jsonGeoMessagesRequest);
 	}
 
 	protected void centerMap() {

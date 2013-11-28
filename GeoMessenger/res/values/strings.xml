@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">GeoMessenger</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_profile">Your Profile:</string>
+    <string name="title_main">Login to GeoMessenger</string>
+    <string name="btn_signin">Intel Identity Sign In</string>
+    <string name="btn_logout">Logout</string>
+    <string name="btn_save">Save</string>
+    <string name="message_no_internet">There is no internet connection. Please conencto to network.</string>
+    <string name="message_result_is_null">Error: Result is null</string>
+    <string name="webview_progress_title">Intel Identity Services</string>
+    <string name="webview_progress">Loading&#8230;</string>
+
+</resources>

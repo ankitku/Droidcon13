@@ -1,8 +1,10 @@
 package com.nkt.geomessenger;
 
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -13,6 +15,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
@@ -28,6 +31,7 @@ import com.intel.identity.webview.service.AuthDataPreferences;
 import com.intel.identity.webview.service.OAuthSyncManager;
 import com.nkt.geomessenger.constants.Constants;
 import com.nkt.geomessenger.map.CustomerLocationUpdater;
+import com.nkt.geomessenger.service.PollGeoMessagesService;
 
 /**
  * Callback Activity that is started from the web view activity or manually. It
@@ -43,6 +47,24 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 	private LinearLayout bottomView;
 	private Handler handler;
 
+	private BroadcastReceiver receiver = new BroadcastReceiver() {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Bundle bundle = intent.getExtras();
+			if (bundle != null) {
+				String string = bundle
+						.getString(PollGeoMessagesService.FILEPATH);
+				int resultCode = bundle.getInt(PollGeoMessagesService.RESULT);
+				if (resultCode == RESULT_OK) {
+					Toast.makeText(CallbackFragmentActivity.this,
+							"Download complete. Download URI: " + string,
+							Toast.LENGTH_LONG).show();
+					// show on map
+				}
+			}
+		}
+	};
 
 	protected MenuItem action_signout, menu_legalnotices;
 
@@ -118,13 +140,14 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 
 		getSupportActionBar().setHomeButtonEnabled(true);
 		getSupportActionBar().setDisplayShowTitleEnabled(true);
-		
+
 		handler = new Handler();
-		
+
 		if (GeoMessenger.customerLocationUpdateHandler == null)
 			GeoMessenger.customerLocationUpdateHandler = new CustomerLocationUpdater();
 
-		GeoMessenger.customerLocationUpdateHandler.start(CallbackFragmentActivity.this);
+		GeoMessenger.customerLocationUpdateHandler
+				.start(CallbackFragmentActivity.this);
 
 	}
 
@@ -172,21 +195,30 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 		GetProfileAsync async = new GetProfileAsync();
 		async.execute(authorizationCode);
 	}
-	
+
 	@Override
 	protected void onResume() {
 		// TODO Auto-generated method stub
 		super.onResume();
-		
+	    registerReceiver(receiver, new IntentFilter(PollGeoMessagesService.NOTIFICATION));
+
 		handler.post(new Runnable() {
-			
+
 			@Override
 			public void run() {
-				
+
 				centerMap();
-				handler.postDelayed(this, 4*Constants.MILLIS_IN_A_SECOND);
+				handler.postDelayed(this, 4 * Constants.MILLIS_IN_A_SECOND);
 			}
 		});
+	}
+	
+	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
+		GeoMessenger.customerLocationUpdateHandler.stop();
+	    unregisterReceiver(receiver);
 	}
 
 	protected void setUpMapIfNeeded() {
@@ -225,6 +257,8 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 				String[] details = text.split("\n");
 				GeoMessenger.userEmail = details[0];
 				GeoMessenger.userName = details[1];
+				
+				startService();
 			}
 
 			// setupTable();
@@ -234,6 +268,12 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 
 			super.onPostExecute(result);
 		}
+	}
+	
+	private void startService()
+	{
+		Intent intent = new Intent(this, PollGeoMessagesService.class);
+	    startService(intent);
 	}
 
 	/**
@@ -268,10 +308,8 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 			finish();
 		}
 	}
-	
-	
-	public void showFields(View v)
-	{
+
+	public void showFields(View v) {
 		bottomView.startAnimation(animateBottomViewOut);
 
 		handler.postDelayed(new Runnable() {
@@ -288,13 +326,13 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 			}
 		}, 400);
 	}
-	
+
 	protected void centerMap() {
-			if (GeoMessenger.customerLocation != null) {
-				LatLng p = new LatLng(GeoMessenger.customerLocation.getLatitude(),
-						GeoMessenger.customerLocation.getLongitude());
-				mapFragment.moveCamera(CameraUpdateFactory.newLatLngZoom(p, 16));
-			}
+		if (GeoMessenger.customerLocation != null) {
+			LatLng p = new LatLng(GeoMessenger.customerLocation.getLatitude(),
+					GeoMessenger.customerLocation.getLongitude());
+			mapFragment.moveCamera(CameraUpdateFactory.newLatLngZoom(p, 16));
+		}
 	}
 
 	@Override
@@ -315,12 +353,5 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 			break;
 		}
 		return super.onOptionsItemSelected(item);
-	}
-	
-	@Override
-	protected void onPause() {
-		// TODO Auto-generated method stub
-		super.onPause();
-		GeoMessenger.customerLocationUpdateHandler.stop();
 	}
 }

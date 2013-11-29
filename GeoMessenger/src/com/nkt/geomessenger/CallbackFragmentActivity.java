@@ -3,10 +3,11 @@ package com.nkt.geomessenger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
@@ -16,18 +17,21 @@ import android.os.Handler;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.android.volley.Request.Method;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.Request.Method;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -39,7 +43,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.intel.identity.webview.service.AuthDataPreferences;
 import com.intel.identity.webview.service.OAuthSyncManager;
-import com.nkt.geomessenger.constants.Constants;
 import com.nkt.geomessenger.constants.UrlConstants;
 import com.nkt.geomessenger.map.CustomerLocationUpdater;
 import com.nkt.geomessenger.model.GeoMessage;
@@ -60,6 +63,10 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 	private View mProgress;
 	private LinearLayout bottomView;
 	private Handler handler;
+	private EditText emailText, msgText;
+	private Button saveButton;
+	private TextView t1, t2;
+	private boolean fieldsVisible;
 
 	private BroadcastReceiver receiver = new BroadcastReceiver() {
 
@@ -73,15 +80,18 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 				if (resultCode == RESULT_OK) {
 					mapFragment.clear();
 					if (GeoMessenger.geoMessages != null) {
-						for (GeoMessage gm : GeoMessenger.geoMessages.getResult()) {
+						for (GeoMessage gm : GeoMessenger.geoMessages
+								.getResult()) {
 							LatLng p = new LatLng(Double.parseDouble(gm
 									.getLatitude()), Double.parseDouble(gm
 									.getLongitude()));
-							Marker m = mapFragment.addMarker(new MarkerOptions()
-									.position(p)
-									.title(gm.getFromName() + " ( "
-											+ gm.getFromEmail() + " ) " + " says: ")
-									.snippet(gm.getGeoMessage()));
+							Marker m = mapFragment
+									.addMarker(new MarkerOptions()
+											.position(p)
+											.title(gm.getFromName() + " ( "
+													+ gm.getFromEmail() + " ) "
+													+ " says: ")
+											.snippet(gm.getGeoMessage()));
 							m.showInfoWindow();
 						}
 					}
@@ -162,6 +172,21 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 		mResult = findViewById(R.id.ly_result);
 		bottomView = (LinearLayout) findViewById(R.id.bottom_view);
 
+		emailText = (EditText) findViewById(R.id.email_text);
+		msgText = (EditText) findViewById(R.id.msg_text);
+		saveButton = (Button) findViewById(R.id.btn_save);
+
+		t1 = (TextView) findViewById(R.id.t1);
+		t2 = (TextView) findViewById(R.id.t2);
+
+		saveButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				showFields();
+			}
+		});
+
 		getSupportActionBar().setHomeButtonEnabled(true);
 		getSupportActionBar().setDisplayShowTitleEnabled(true);
 
@@ -193,7 +218,7 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 		if (GeoMessenger.isGooglePlayServicesAvailable) { // activity specific
 															// map needs
 			setUpMapIfNeeded();
-			
+
 			mapFragment.getUiSettings().setCompassEnabled(true);
 			mapFragment.setMyLocationEnabled(true);
 			mapFragment.getUiSettings().setMyLocationButtonEnabled(false);
@@ -235,7 +260,7 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 			public void run() {
 
 				centerMap();
-				//handler.postDelayed(this, 4 * Constants.MILLIS_IN_A_SECOND);
+				// handler.postDelayed(this, 4 * Constants.MILLIS_IN_A_SECOND);
 			}
 		});
 	}
@@ -335,7 +360,40 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 		}
 	}
 
-	public void showFields(View v) {
+	public void showFields() {
+		fieldsVisible = true;
+		bottomView.startAnimation(animateBottomViewOut);
+
+		saveButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				sendMessage();
+			}
+		});
+
+		handler.postDelayed(new Runnable() {
+
+			@Override
+			public void run() {
+				runOnUiThread(new Runnable() {
+
+					@Override
+					public void run() {
+						t1.setVisibility(View.VISIBLE);
+						t2.setVisibility(View.VISIBLE);
+						emailText.setVisibility(View.VISIBLE);
+						msgText.setVisibility(View.VISIBLE);
+
+						bottomView.startAnimation(animateBottomViewIn);
+					}
+				});
+			}
+		}, 400);
+	}
+
+	public void hideFields() {
+		fieldsVisible = false;
 		bottomView.startAnimation(animateBottomViewOut);
 
 		handler.postDelayed(new Runnable() {
@@ -346,6 +404,11 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 
 					@Override
 					public void run() {
+						t1.setVisibility(View.GONE);
+						t2.setVisibility(View.GONE);
+						emailText.setVisibility(View.GONE);
+						msgText.setVisibility(View.GONE);
+
 						bottomView.startAnimation(animateBottomViewIn);
 					}
 				});
@@ -353,7 +416,11 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 		}, 400);
 	}
 
-	private void sendMessage(String email, String msg) {
+	private void sendMessage() {
+
+		String email = emailText.getText().toString();
+		String msg = msgText.getText().toString();
+
 		JSONObject jsonObjectRequest = new JSONObject();
 		JSONObject request = new JSONObject();
 		try {
@@ -366,22 +433,31 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 
 			jsonObjectRequest.put("action", "put-point");
 			jsonObjectRequest.put("request", request);
-			
+
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-
 		JsonObjectRequest jsonGeoMessagesRequest = new JsonObjectRequest(
-				Method.POST, UrlConstants.getBaseUrl(),
-				jsonObjectRequest, new Response.Listener<JSONObject>() {
+				Method.POST, UrlConstants.getBaseUrl(), jsonObjectRequest,
+				new Response.Listener<JSONObject>() {
 
 					@Override
 					public void onResponse(JSONObject response) {
-						String jsonrep = response.toString();
-						GeoMessenger.geoMessages = GsonConvertibleObject.getObjectFromJson(jsonrep, Result.class);
+						hideFields();
+						showAlertDialog();
+						emailText.setText("");
+						msgText.setText("");
+						saveButton.setOnClickListener(new OnClickListener() {
+
+							@Override
+							public void onClick(View arg0) {
+								showFields();
+							}
+						});
 					}
+
 				}, new Response.ErrorListener() {
 
 					@Override
@@ -389,8 +465,19 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 					}
 
 				});
-		
+
 		GeoMessenger.queue.add(jsonGeoMessagesRequest);
+	}
+
+	private void showAlertDialog() {
+		new AlertDialog.Builder(CallbackFragmentActivity.this)
+				.setTitle("Message saved")
+				.setMessage("Your message for has been saved")
+				.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.cancel();
+					}
+				}).show();
 	}
 
 	protected void centerMap() {
@@ -419,5 +506,20 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 			break;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	public void onBackPressed() {
+		if (fieldsVisible) {
+			saveButton.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View arg0) {
+					showFields();
+				}
+			});
+			hideFields();
+		} else
+			super.onBackPressed();
 	}
 }

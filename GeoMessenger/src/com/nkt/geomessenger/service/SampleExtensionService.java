@@ -32,19 +32,18 @@ Copyright (c) 2011-2013, Sony Mobile Communications AB
 
 package com.nkt.geomessenger.service;
 
-import java.util.Random;
-
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
-import android.os.SystemClock;
+import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.nkt.geomessenger.GeoMessenger;
 import com.nkt.geomessenger.R;
+import com.nkt.geomessenger.model.GeoMessage;
+import com.nkt.geomessenger.utils.Utils;
 import com.sonyericsson.extras.liveware.aef.notification.Notification;
 import com.sonyericsson.extras.liveware.aef.registration.Registration;
 import com.sonyericsson.extras.liveware.extension.util.ExtensionService;
@@ -62,7 +61,7 @@ public class SampleExtensionService extends ExtensionService {
 	/**
 	 * Extensions specific id for the source
 	 */
-	public static final String EXTENSION_SPECIFIC_ID = "EXTENSION_SPECIFIC_ID_SAMPLE_NOTIFICATION";
+	public static final String EXTENSION_SPECIFIC_ID = "EXTENSION_SPECIFIC_ID_GEOMESSENGER_NOTIFICATION";
 
 	/**
 	 * Extension key
@@ -75,23 +74,6 @@ public class SampleExtensionService extends ExtensionService {
 	public static final String LOG_TAG = "SampleNotificationExtension";
 
 	/**
-	 * Event names
-	 */
-	private static final String[] NAMES = new String[] { "Name A", "Name B",
-			"Name C", "Name D", "Name D", "Name E", };
-
-	/**
-	 * Event messages
-	 */
-	private static final String[] MESSAGE = new String[] { "Message 1",
-			"Message 2", "Message 3", "Message 4", "Message 5", "Message 6", };
-
-	/**
-	 * Time between new data insertion
-	 */
-	private static final long INTERVAL = 10 * 1000;
-
-	/**
 	 * Starts periodic insert of data handled in onStartCommand()
 	 */
 	public static final String INTENT_ACTION_START = "com.sonymobile.smartconnect.extension.notificationsample.action.start";
@@ -101,10 +83,9 @@ public class SampleExtensionService extends ExtensionService {
 	 */
 	public static final String INTENT_ACTION_STOP = "com.sonymobile.smartconnect.extension.notificationsample.action.stop";
 
-	/**
-	 * Add data, handled in onStartCommand()
-	 */
-	private static final String INTENT_ACTION_ADD = "com.sonymobile.smartconnect.extension.notificationsample.action.add";
+	private Handler handler;
+
+	private Runnable swSender;
 
 	public SampleExtensionService() {
 		super(EXTENSION_KEY);
@@ -119,6 +100,23 @@ public class SampleExtensionService extends ExtensionService {
 	public void onCreate() {
 		super.onCreate();
 		Log.d(LOG_TAG, "onCreate");
+
+		handler = new Handler();
+		swSender = new Runnable() {
+
+			@Override
+			public void run() {
+
+				for (GeoMessage gm : GeoMessenger.geoMessages.getResult()) {
+					if (!GeoMessenger.messagesSentToWatch.contains(gm)) {
+						addData(gm);
+						GeoMessenger.messagesSentToWatch.add(gm);
+					}
+				}
+
+				handler.postDelayed(swSender,5000);
+			}
+		};
 	}
 
 	/**
@@ -137,10 +135,6 @@ public class SampleExtensionService extends ExtensionService {
 			} else if (INTENT_ACTION_STOP.equals(intent.getAction())) {
 				Log.d(LOG_TAG, "onStart action: INTENT_ACTION_STOP");
 				stopAddData();
-				stopSelfCheck();
-			} else if (INTENT_ACTION_ADD.equals(intent.getAction())) {
-				Log.d(LOG_TAG, "onStart action: INTENT_ACTION_ADD");
-				addData();
 				stopSelfCheck();
 			}
 		}
@@ -163,33 +157,33 @@ public class SampleExtensionService extends ExtensionService {
 	 * Start periodic data insertion into event table
 	 */
 	private void startAddData() {
-		AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-		Intent i = new Intent(this, SampleExtensionService.class);
-		i.setAction(INTENT_ACTION_ADD);
-		PendingIntent pi = PendingIntent.getService(this, 0, i, 0);
-		am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-				SystemClock.elapsedRealtime(), INTERVAL, pi);
+		handler.post(swSender);
 	}
 
 	/**
 	 * Cancel scheduled data insertion
 	 */
 	private void stopAddData() {
-		AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-		Intent i = new Intent(this, SampleExtensionService.class);
-		i.setAction(INTENT_ACTION_ADD);
-		PendingIntent pi = PendingIntent.getService(this, 0, i, 0);
-		am.cancel(pi);
+		handler.removeCallbacks(swSender);
 	}
 
 	/**
-	 * Add some "random" data
+	 * Add geomessages to db to be picked up by app
 	 */
-	private void addData() {
-		Random rand = new Random();
-		int index = rand.nextInt(5);
-		String name = NAMES[index];
-		String message = MESSAGE[index];
+	private void addData(GeoMessage gm) {
+
+		if (gm == null)
+			return;
+
+		String name = gm.getFromName();
+		double distance = Utils.haversine(
+				GeoMessenger.customerLocation.getLatitude(),
+				GeoMessenger.customerLocation.getLongitude(),
+				Double.parseDouble(gm.getLatitude()),
+				Double.parseDouble(gm.getLongitude()));
+
+		String message = name + " left a message for you " + distance
+				+ " metres away saying ->" + gm.getGeoMessage();
 		long time = System.currentTimeMillis();
 		long sourceId = NotificationUtil.getSourceId(this,
 				EXTENSION_SPECIFIC_ID);
@@ -197,6 +191,7 @@ public class SampleExtensionService extends ExtensionService {
 			Log.e(LOG_TAG, "Failed to insert data");
 			return;
 		}
+
 		String profileImage = ExtensionUtils.getUriString(this,
 				R.drawable.widget_default_userpic_bg);
 

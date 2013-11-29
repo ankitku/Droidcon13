@@ -8,7 +8,7 @@
     <string name="title_main">Login to GeoMessenger</string>
     <string name="btn_signin">Intel Identity Sign In</string>
     <string name="btn_logout">Logout</string>
-    <string name="btn_save">Save</string>
+    <string name="btn_save">Post a message</string>
     <string name="message_no_internet">There is no internet connection. Please conencto to network.</string>
     <string name="message_result_is_null">Error: Result is null</string>
     <string name="webview_progress_title">Intel Identity Services</string>

@@ -41,14 +41,17 @@
 
         <activity
             android:name=".LoginFragmentActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".CallbackFragmentActivity" >
+        <activity
+            android:name=".CallbackFragmentActivity"
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -65,7 +68,7 @@
             android:noHistory="true" >
         </activity>
 
-        <service android:name="com.nkt.geomessenger.service.PollGeoMessagesService" />        
+        <service android:name="com.nkt.geomessenger.service.PollGeoMessagesService" />
         <service android:name="com.nkt.geomessenger.service.SampleExtensionService" />
 
         <receiver
@@ -99,7 +102,6 @@
                 <action android:name="com.sonyericsson.extras.aef.control.SWIPE_EVENT" />
             </intent-filter>
         </receiver>
-        
     </application>
 
 </manifest>

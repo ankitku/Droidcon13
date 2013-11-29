@@ -1,11 +1,15 @@
 package com.nkt.geomessenger;
 
+import java.util.HashMap;
+import java.util.HashSet;
+
 import android.location.Location;
 
 import com.android.volley.RequestQueue;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.nkt.geomessenger.map.CustomerLocationUpdater;
+import com.nkt.geomessenger.model.GeoMessage;
 import com.nkt.geomessenger.model.Result;
 
 public class GeoMessenger {
@@ -28,4 +32,6 @@ public class GeoMessenger {
 	public static CustomerLocationUpdater customerLocationUpdateHandler;
 	
 	public static Result geoMessages;
+	
+	public static HashSet<GeoMessage> messagesSentToWatch = new HashSet<GeoMessage>();
 }

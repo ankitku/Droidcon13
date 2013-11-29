@@ -35,4 +35,9 @@ public class GeoMessage extends GsonConvertibleObject {
 				&& gm.getLongitude().equals(longitude) && gm.getFromEmail()
 				.equals(fromEmail));
 	}
+	
+	@Override
+	public int hashCode() {
+		return 1;
+	}
 }

@@ -183,7 +183,7 @@ public class SampleExtensionService extends ExtensionService {
 				Double.parseDouble(gm.getLongitude()));
 
 		String message = name + " left a message for you " + distance
-				+ " metres away saying ->" + gm.getGeoMessage();
+				+ " Kms away saying ->" + gm.getGeoMessage();
 		long time = System.currentTimeMillis();
 		long sourceId = NotificationUtil.getSourceId(this,
 				EXTENSION_SPECIFIC_ID);

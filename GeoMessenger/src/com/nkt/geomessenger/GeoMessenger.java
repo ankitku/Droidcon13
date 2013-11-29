@@ -1,6 +1,5 @@
 package com.nkt.geomessenger;
 
-import java.util.HashMap;
 import java.util.HashSet;
 
 import android.location.Location;

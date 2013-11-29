@@ -43,11 +43,10 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.intel.identity.webview.service.AuthDataPreferences;
 import com.intel.identity.webview.service.OAuthSyncManager;
+import com.nkt.geomessenger.constants.Constants;
 import com.nkt.geomessenger.constants.UrlConstants;
 import com.nkt.geomessenger.map.CustomerLocationUpdater;
 import com.nkt.geomessenger.model.GeoMessage;
-import com.nkt.geomessenger.model.GsonConvertibleObject;
-import com.nkt.geomessenger.model.Result;
 import com.nkt.geomessenger.service.PollGeoMessagesService;
 
 /**
@@ -74,8 +73,7 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 		public void onReceive(Context context, Intent intent) {
 			Bundle bundle = intent.getExtras();
 			if (bundle != null) {
-				String string = bundle
-						.getString(PollGeoMessagesService.FILEPATH);
+				//String string = bundle.getString(PollGeoMessagesService.FILEPATH);
 				int resultCode = bundle.getInt(PollGeoMessagesService.RESULT);
 				if (resultCode == RESULT_OK) {
 					mapFragment.clear();
@@ -260,7 +258,7 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 			public void run() {
 
 				centerMap();
-				// handler.postDelayed(this, 4 * Constants.MILLIS_IN_A_SECOND);
+				handler.postDelayed(this, 4 * Constants.MILLIS_IN_A_SECOND);
 			}
 		});
 	}

@@ -1,0 +1,20 @@
+development:
+  access_key_id: AKIAIANZKJCTV452EHYA
+  secret_access_key: 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
+  dynamo_db_endpoint: dynamodb.ap-southeast-1.amazonaws.com # Set the regional endpoint
+ 
+test:
+  access_key_id: AKIAIANZKJCTV452EHYA
+  secret_access_key: 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
+  dynamo_db_endpoint: dynamodb.ap-southeast-1.amazonaws.com # Set the regional endpoint
+
+
+staging:
+  access_key_id: AKIAIANZKJCTV452EHYA
+  secret_access_key: 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
+  dynamo_db_endpoint: dynamodb.ap-southeast-1.amazonaws.com # Set the regional endpoint
+ 
+production:
+  access_key_id: AKIAIANZKJCTV452EHYA
+  secret_access_key: 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
+  dynamo_db_endpoint: dynamodb.ap-southeast-1.amazonaws.com # Set the regional endpoint

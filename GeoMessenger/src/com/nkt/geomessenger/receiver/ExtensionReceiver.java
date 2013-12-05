@@ -31,6 +31,7 @@ Copyright (c) 2011-2013, Sony Mobile Communications AB
  */
 package com.nkt.geomessenger.receiver;
 
+import com.nkt.geomessenger.GeoMessenger;
 import com.nkt.geomessenger.service.SampleExtensionService;
 
 import android.content.BroadcastReceiver;
@@ -47,6 +48,7 @@ public class ExtensionReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(final Context context, final Intent intent) {
         Log.d("", "onReceive: " + intent.getAction());
+        GeoMessenger.messagesSentToWatch.clear();
         intent.setClass(context, SampleExtensionService.class);
         context.startService(intent);
     }

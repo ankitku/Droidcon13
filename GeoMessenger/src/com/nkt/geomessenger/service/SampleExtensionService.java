@@ -32,6 +32,8 @@ Copyright (c) 2011-2013, Sony Mobile Communications AB
 
 package com.nkt.geomessenger.service;
 
+import java.text.DecimalFormat;
+
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -114,7 +116,7 @@ public class SampleExtensionService extends ExtensionService {
 					}
 				}
 
-				handler.postDelayed(swSender,5000);
+				handler.postDelayed(swSender,1000);
 			}
 		};
 	}
@@ -180,10 +182,12 @@ public class SampleExtensionService extends ExtensionService {
 				GeoMessenger.customerLocation.getLatitude(),
 				GeoMessenger.customerLocation.getLongitude(),
 				Double.parseDouble(gm.getLatitude()),
-				Double.parseDouble(gm.getLongitude()));
+				Double.parseDouble(gm.getLongitude()))*1000;
+		
+		DecimalFormat df = new DecimalFormat("#.##");
 
-		String message = name + " left a message for you " + distance
-				+ " Kms away saying ->" + gm.getGeoMessage();
+		String message = name + " left a message for you " + df.format(distance)
+				+ " meters away saying ->" + gm.getGeoMessage();
 		long time = System.currentTimeMillis();
 		long sourceId = NotificationUtil.getSourceId(this,
 				EXTENSION_SPECIFIC_ID);

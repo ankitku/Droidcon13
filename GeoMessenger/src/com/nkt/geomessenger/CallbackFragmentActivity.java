@@ -25,7 +25,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
@@ -41,8 +40,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.intel.identity.webview.service.AuthDataPreferences;
-import com.intel.identity.webview.service.OAuthSyncManager;
 import com.nkt.geomessenger.constants.Constants;
 import com.nkt.geomessenger.constants.UrlConstants;
 import com.nkt.geomessenger.map.CustomerLocationUpdater;
@@ -56,7 +53,7 @@ import com.nkt.geomessenger.service.PollGeoMessagesService;
  * @author durantea
  * 
  */
-public class CallbackFragmentActivity extends SherlockFragmentActivity {
+public class CallbackFragmentActivity extends GMActivity {
 
 	private View mResult;
 	private View mProgress;
@@ -292,10 +289,13 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 
 		@Override
 		protected String doInBackground(String... args) {
-			final OAuthSyncManager mOAuth = new OAuthSyncManager(
-					getApplicationContext());
-
-			return mOAuth.getUserProfileThreeStep(args[0]);
+//			final OAuthSyncManager mOAuth = new OAuthSyncManager(
+//					getApplicationContext());
+//
+//			return mOAuth.getUserProfileThreeStep(args[0]);
+			
+			return "boo";
+					
 		}
 
 		@Override
@@ -305,7 +305,7 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 
 			if (!getString(R.string.message_result_is_null).equals(text)) {
 				String[] details = text.split("\n");
-				GeoMessenger.userEmail = details[0];
+				GeoMessenger.userId = details[0];
 				GeoMessenger.userName = details[1];
 
 				startService();
@@ -339,10 +339,10 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 		protected Boolean doInBackground(Void... arg0) {
 			final Context mContext = getApplicationContext();
 
-			AuthDataPreferences.getInstance(mContext).setAccessToken("");
-			AuthDataPreferences.getInstance(mContext).setRefreshToken("");
-			AuthDataPreferences.getInstance(mContext).setExpiresIn("");
-
+//			AuthDataPreferences.getInstance(mContext).setAccessToken("");
+//			AuthDataPreferences.getInstance(mContext).setRefreshToken("");
+//			AuthDataPreferences.getInstance(mContext).setExpiresIn("");
+//
 			return true;
 		}
 
@@ -425,7 +425,7 @@ public class CallbackFragmentActivity extends SherlockFragmentActivity {
 			request.put("lat", GeoMessenger.customerLocation.getLatitude());
 			request.put("lng", GeoMessenger.customerLocation.getLongitude());
 			request.put("geoMsg", msg);
-			request.put("fromEmail", GeoMessenger.userEmail);
+			request.put("fromEmail", GeoMessenger.userId);
 			request.put("fromName", GeoMessenger.userName);
 			request.put("toEmail", email);
 

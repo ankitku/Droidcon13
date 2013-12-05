@@ -17,13 +17,12 @@
         android:text="@string/title_main"
         android:textSize="20sp" />
 
-    <ImageButton
-        android:id="@+id/btn_sign_in"
-        android:layout_width="wrap_content"
+    <com.facebook.widget.LoginButton
+        android:id="@+id/fb_login_button"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:contentDescription="@string/app_name"
-        android:cropToPadding="true"
-        android:src="@drawable/large_btn_blue" />
+        android:layout_marginBottom="30dp"
+        android:layout_marginTop="30dp" />
 
 </LinearLayout>

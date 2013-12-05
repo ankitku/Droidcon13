@@ -1,6 +1,8 @@
 package com.nkt.geomessenger;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 import android.location.Location;
 
@@ -8,10 +10,11 @@ import com.android.volley.RequestQueue;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.nkt.geomessenger.map.CustomerLocationUpdater;
+import com.nkt.geomessenger.model.FBFriend;
 import com.nkt.geomessenger.model.GeoMessage;
 import com.nkt.geomessenger.model.Result;
 
-public class GeoMessenger {
+public class GeoMessenger{
 
 	public final static String TAG = CallbackFragmentActivity.class
 			.getSimpleName();
@@ -20,7 +23,9 @@ public class GeoMessenger {
 	
 	public static String userName;
 	
-	public static String userEmail;
+	public static String userId;
+	
+	public static List<FBFriend> userFriends = new ArrayList<FBFriend>();
 	
 	public static Gson gson = new GsonBuilder().create();
 

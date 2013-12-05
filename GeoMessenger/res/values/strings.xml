@@ -6,14 +6,13 @@
     <string name="hello_world">Hello world!</string>
     <string name="title_profile">Your Profile:</string>
     <string name="title_main">Login to GeoMessenger</string>
-    <string name="btn_signin">Intel Identity Sign In</string>
     <string name="btn_logout">Logout</string>
     <string name="btn_save">Post a message</string>
     <string name="message_no_internet">There is no internet connection. Please conencto to network.</string>
     <string name="message_result_is_null">Error: Result is null</string>
     <string name="webview_progress_title">Intel Identity Services</string>
     <string name="webview_progress">Loading&#8230;</string>
-    
+
     <!-- Title of preference activity -->
     <string name="preference_activity_title">GeoMessenger notification Settings</string>
     <!-- Configuration text shown in preferences -->
@@ -29,7 +28,6 @@
 
     <!-- Text that is read before the display name on accessories that supports text to speech -->
     <string name="text_to_speech">New GeoMessenger notification event from</string>
-
     <string name="preference_option_read_me">READ ME</string>
     <string name="preference_key_read_me">preference_key_read_me</string>
     <string name="preference_option_read_me_txt">1. Check menu option Active to generate events based on a static timer.\n\n2. Uncheck menu option Active to cancel the event generator.\n\n3. Tap Clear All Events to remove all events.</string>
@@ -40,6 +38,16 @@
     <string name="preference_key_clear">preference_key_clear</string>
     <string name="clear_success">All events have been deleted</string>
     <string name="clear_failure">Failed to delete events</string>
+    <string name="generic_error">Something went wrong</string>
+    <string name="error_authentication_retry">An error occurred that requires your attention. %1$s</string>
+    <string name="error_authentication_reopen">An error occurred, please re-login.</string>
+    <string name="error_permission">Please allow us to post on your behalf.</string>
+    <string name="error_server">The server is busy, please retry later.</string>
+    <string name="error_bad_request">An error occurred, please contact the developer with the following message: %1$s</string>
+    <string name="error_unknown">An unknown error occurred, please contact the developer with the following message: %1$s</string>
+    <string name="exception">Exception: %1$s</string>
+    <string name="okay">OK</string>
     
+    <string name="app_id">1430458327171049</string>
 
 </resources>

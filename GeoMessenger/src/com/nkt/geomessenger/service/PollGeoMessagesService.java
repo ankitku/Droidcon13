@@ -49,7 +49,7 @@ public class PollGeoMessagesService extends IntentService {
 					request.put("lat", GeoMessenger.customerLocation.getLatitude());
 					request.put("lng", GeoMessenger.customerLocation.getLongitude());
 					request.put("radiusInMeter", 10000);
-					request.put("userEmail", GeoMessenger.userEmail);
+					request.put("userEmail", GeoMessenger.userId);
 
 					jsonObjectRequest.put("action", "query-radius-user");
 					jsonObjectRequest.put("request", request);

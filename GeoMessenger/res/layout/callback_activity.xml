@@ -48,18 +48,18 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="top"
                     android:layout_weight="0"
-                    android:text="Leave message for (email)"
+                    android:text="Leave message for your fb friends"
                     android:textIsSelectable="false"
                     android:textSize="20sp"
                     android:visibility="gone" />
 
-                <EditText
-                    android:id="@+id/email_text"
+                <Button
+                    android:text="select friends"
+                    android:id="@+id/friends_picker"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:imeOptions="actionNext"
-                    android:inputType="textEmailAddress"
-                    android:visibility="gone" />
+                    android:visibility="gone"
+                    android:onClick="showFriendsPicker" />
 
                 <TextView
                     android:id="@+id/t2"

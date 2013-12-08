@@ -32,6 +32,7 @@ import com.android.volley.Request.Method;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.facebook.Session;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -59,8 +60,8 @@ public class CallbackFragmentActivity extends GMActivity {
 	private View mProgress;
 	private LinearLayout bottomView;
 	private Handler handler;
-	private EditText emailText, msgText;
-	private Button saveButton;
+	private EditText msgText;
+	private Button saveButton, friendsPicker;
 	private TextView t1, t2;
 	private boolean fieldsVisible;
 
@@ -70,7 +71,8 @@ public class CallbackFragmentActivity extends GMActivity {
 		public void onReceive(Context context, Intent intent) {
 			Bundle bundle = intent.getExtras();
 			if (bundle != null) {
-				//String string = bundle.getString(PollGeoMessagesService.FILEPATH);
+				// String string =
+				// bundle.getString(PollGeoMessagesService.FILEPATH);
 				int resultCode = bundle.getInt(PollGeoMessagesService.RESULT);
 				if (resultCode == RESULT_OK) {
 					mapFragment.clear();
@@ -167,7 +169,7 @@ public class CallbackFragmentActivity extends GMActivity {
 		mResult = findViewById(R.id.ly_result);
 		bottomView = (LinearLayout) findViewById(R.id.bottom_view);
 
-		emailText = (EditText) findViewById(R.id.email_text);
+		friendsPicker = (Button) findViewById(R.id.friends_picker);
 		msgText = (EditText) findViewById(R.id.msg_text);
 		saveButton = (Button) findViewById(R.id.btn_save);
 
@@ -237,8 +239,8 @@ public class CallbackFragmentActivity extends GMActivity {
 		// there's an access token saved in preferences
 
 		// get the user profile
-		GetProfileAsync async = new GetProfileAsync();
-		async.execute(authorizationCode);
+		//GetProfileAsync async = new GetProfileAsync();
+		//async.execute(authorizationCode);
 	}
 
 	@Override
@@ -289,13 +291,13 @@ public class CallbackFragmentActivity extends GMActivity {
 
 		@Override
 		protected String doInBackground(String... args) {
-//			final OAuthSyncManager mOAuth = new OAuthSyncManager(
-//					getApplicationContext());
-//
-//			return mOAuth.getUserProfileThreeStep(args[0]);
-			
+			// final OAuthSyncManager mOAuth = new OAuthSyncManager(
+			// getApplicationContext());
+			//
+			// return mOAuth.getUserProfileThreeStep(args[0]);
+
 			return "boo";
-					
+
 		}
 
 		@Override
@@ -339,10 +341,7 @@ public class CallbackFragmentActivity extends GMActivity {
 		protected Boolean doInBackground(Void... arg0) {
 			final Context mContext = getApplicationContext();
 
-//			AuthDataPreferences.getInstance(mContext).setAccessToken("");
-//			AuthDataPreferences.getInstance(mContext).setRefreshToken("");
-//			AuthDataPreferences.getInstance(mContext).setExpiresIn("");
-//
+			Session.getActiveSession().closeAndClearTokenInformation();
 			return true;
 		}
 
@@ -380,7 +379,7 @@ public class CallbackFragmentActivity extends GMActivity {
 					public void run() {
 						t1.setVisibility(View.VISIBLE);
 						t2.setVisibility(View.VISIBLE);
-						emailText.setVisibility(View.VISIBLE);
+						friendsPicker.setVisibility(View.VISIBLE);
 						msgText.setVisibility(View.VISIBLE);
 
 						bottomView.startAnimation(animateBottomViewIn);
@@ -404,7 +403,7 @@ public class CallbackFragmentActivity extends GMActivity {
 					public void run() {
 						t1.setVisibility(View.GONE);
 						t2.setVisibility(View.GONE);
-						emailText.setVisibility(View.GONE);
+						friendsPicker.setVisibility(View.GONE);
 						msgText.setVisibility(View.GONE);
 
 						bottomView.startAnimation(animateBottomViewIn);
@@ -413,10 +412,21 @@ public class CallbackFragmentActivity extends GMActivity {
 			}
 		}, 400);
 	}
+	
+	public void showFriendsPicker(View v)
+	{
+        if (Session.getActiveSession() != null &&
+                Session.getActiveSession().isOpened()) {
+            
+            Intent intent = new Intent();
+            intent.setClass(CallbackFragmentActivity.this, PickerActivity.class);
+            startActivityForResult(intent, 1);
+        }
+	}
 
 	private void sendMessage() {
 
-		String email = emailText.getText().toString();
+		String email = "lol";
 		String msg = msgText.getText().toString();
 
 		JSONObject jsonObjectRequest = new JSONObject();
@@ -445,7 +455,6 @@ public class CallbackFragmentActivity extends GMActivity {
 					public void onResponse(JSONObject response) {
 						hideFields();
 						showAlertDialog();
-						emailText.setText("");
 						msgText.setText("");
 						saveButton.setOnClickListener(new OnClickListener() {
 

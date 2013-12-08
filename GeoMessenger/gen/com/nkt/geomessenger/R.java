@@ -1469,8 +1469,8 @@ containing a value of this type.
         public static final int disableHome=0x7f05000b;
         public static final int drawer_layout=0x7f05003b;
         public static final int edit_query=0x7f05002d;
-        public static final int email_text=0x7f050041;
         public static final int fb_login_button=0x7f05003a;
+        public static final int friends_picker=0x7f050041;
         public static final int homeAsUp=0x7f050008;
         public static final int hybrid=0x7f050015;
         public static final int large=0x7f050002;
@@ -1482,8 +1482,8 @@ containing a value of this type.
         public static final int msg_text=0x7f050043;
         public static final int none=0x7f050012;
         public static final int normal=0x7f050001;
-        public static final int oauth_webview=0x7f05005b;
         public static final int pg_loading=0x7f05003c;
+        public static final int picker_fragment=0x7f05005b;
         public static final int picker_subtitle=0x7f050055;
         public static final int satellite=0x7f050013;
         public static final int showCustom=0x7f05000a;
@@ -1552,7 +1552,7 @@ containing a value of this type.
         public static final int com_facebook_placepickerfragment_list_row=0x7f030024;
         public static final int com_facebook_search_bar_layout=0x7f030025;
         public static final int com_facebook_usersettingsfragment=0x7f030026;
-        public static final int oauth_fragment=0x7f030027;
+        public static final int pickers=0x7f030027;
         public static final int sherlock_spinner_dropdown_item=0x7f030028;
         public static final int sherlock_spinner_item=0x7f030029;
         public static final int smart_watch_notification_widget=0x7f03002a;
@@ -1613,7 +1613,7 @@ containing a value of this type.
         public static final int action_event_2=0x7f080052;
         public static final int action_event_3=0x7f080053;
         public static final int action_settings=0x7f080043;
-        public static final int app_id=0x7f080068;
+        public static final int app_id=0x7f08006b;
         /**  At least one dummy resource is needed to satisfy aapt.
     Otherwise it complains about no res folder. 
          */
@@ -1747,10 +1747,13 @@ containing a value of this type.
         public static final int error_authentication_reopen=0x7f080061;
         public static final int error_authentication_retry=0x7f080060;
         public static final int error_bad_request=0x7f080064;
+        public static final int error_dialog_button_text=0x7f080067;
+        public static final int error_dialog_default_text=0x7f080068;
+        public static final int error_dialog_title=0x7f080066;
         public static final int error_permission=0x7f080062;
         public static final int error_server=0x7f080063;
         public static final int error_unknown=0x7f080065;
-        public static final int exception=0x7f080066;
+        public static final int exception=0x7f080069;
         /**  Extension name, shown in preferences 
          */
         public static final int extension_name=0x7f08004f;
@@ -1758,7 +1761,7 @@ containing a value of this type.
         public static final int hello_world=0x7f080044;
         public static final int message_no_internet=0x7f080049;
         public static final int message_result_is_null=0x7f08004a;
-        public static final int okay=0x7f080067;
+        public static final int okay=0x7f08006a;
         /**  Title of preference activity 
          */
         public static final int preference_activity_title=0x7f08004d;

@@ -136,7 +136,11 @@ public class LoginFragmentActivity extends GMActivity {
 		if (isRunning()) {
 			if (SessionState.OPENED.equals(state)) {
 
-				makeFBRequests(session);
+				// makeFBRequests(session);
+				Intent intent = new Intent();
+				intent.setClass(LoginFragmentActivity.this,
+						CallbackFragmentActivity.class);
+				startActivity(intent);
 
 			} else if (Session.getActiveSession() != null
 					&& Session.getActiveSession().isClosed()) {
@@ -172,7 +176,7 @@ public class LoginFragmentActivity extends GMActivity {
 										.getString("uid"), friend
 										.getString("name"), friend
 										.getString("pic_square"));
-								
+
 								GeoMessenger.userFriends.add(f);
 							}
 						} catch (JSONException e) {
@@ -188,7 +192,7 @@ public class LoginFragmentActivity extends GMActivity {
 					public void onCompleted(GraphUser user, Response response) {
 						if (session == Session.getActiveSession()) {
 							if (user != null) {
-								
+
 								GeoMessenger.userId = user.getId();
 								Request.executeBatchAsync(myFriendsRequest);
 							}

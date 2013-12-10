@@ -1,4 +1,0 @@
-class GeoMessage
-	include Dynamoid:Document
-	
-	

@@ -9,4 +9,4 @@
 
 # Make sure your secret_key_base is kept private
 # if you're sharing your code publicly.
-GMServer::Application.config.secret_key_base = 'a57b9383ea7f61c776f07af2ce15b5f11a5dd47b816abe889d9bf9e822fd1c1d095f314480cb9b1058f0a9d0a8802d3076700a19564affd9c1c88ea1ef2fe9be'
+GMServer::Application.config.secret_key_base = '2a830e7513e400a821ee243c9384153b5abecaf4785ec0ae6ca6ea3d7dc7c3cf336fa16c871eacb5ba93365dd4b2659300d517b5ce4d5c605a697530fb1bd556'

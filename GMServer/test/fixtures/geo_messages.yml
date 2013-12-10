@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  fromUserId: MyString
+  toUserId: MyString
+  message: MyString
+  msgTime: 1
+
+two:
+  fromUserId: MyString
+  toUserId: MyString
+  message: MyString
+  msgTime: 1

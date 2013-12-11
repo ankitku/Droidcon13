@@ -20,8 +20,17 @@ class GeoMessagesController < ApplicationController
   # GET /geo_messages/1/edit
   def edit
   end
+  
+  # GET /geo_messages/get_nearby_messages
+  def get_nearby_messages
+    userId = params[:user_id]
+    userLoc = params[:loc].collect { |i| i.to_f }
+    radiusInMetres = params[:radius_in_metres].to_f
 
-  # POST /geo_messages
+    gmsgs = nearby_messages(userId, userLoc, radiusInMetres)
+    send_response("SUCCESS", "GET_GM", {:geo_messages => gmsgs}, 200)
+  end
+
   # POST /geo_messages.json
   def create
     entries = 0
@@ -29,10 +38,10 @@ class GeoMessagesController < ApplicationController
     params[:geo_messages].each do |gmsg|
       @geo_message = GeoMessage.new(
       :fromUserId => gmsg[:fromUserId],
-      :fromUserId => gmsg[:toUserId],
+      :toUserId => gmsg[:toUserId],
       :message => gmsg[:message],
       :msgTime => gmsg[:msgTime],
-      :loc => gmsg[:loc]
+      :loc => gmsg[:loc].reverse
       )
       
       @user = User.new(

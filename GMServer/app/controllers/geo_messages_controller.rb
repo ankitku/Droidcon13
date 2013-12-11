@@ -24,31 +24,47 @@ class GeoMessagesController < ApplicationController
   # POST /geo_messages
   # POST /geo_messages.json
   def create
-    @msg = GeoMessage.new(post_params)
+    entries = 0
     
-    @msg.save
-    redirect_to @msg
-  end
-  
-  private
-  def post_params
-    params.require(:geo_message).permit(:fromUserId, :toUserId, :message, :msgTime, :loc)
-  end
-  
-      # @geo_message = GeoMessage.new(geo_message_params)
-# 
-    # respond_to do |format|
-      # if @geo_message.save
-        # format.html { redirect_to @geo_message, notice: 'Geo message was successfully created.' }
-        # format.json { render action: 'show', status: :created, location: @geo_message }
-      # else
-        # format.html { render action: 'new' }
-        # format.json { render json: @geo_message.errors, status: :unprocessable_entity }
-      # end
-    # end
+    params[:geo_messages].each do |gmsg|
+      @geo_message = GeoMessage.new(
+      :fromUserId => gmsg[:fromUserId],
+      :fromUserId => gmsg[:toUserId],
+      :message => gmsg[:message],
+      :msgTime => gmsg[:msgTime],
+      :loc => gmsg[:loc]
+      )
+      
+      @user = User.new(
+      :userId => gmsg[:fromUserId],
+      :name => gmsg[:fromUserName],
+      :pic => gmsg[:fromUserPic]
+      )
+      
+      begin
+        if @geo_message.save
+          entries = entries.succ
+        end
+        @user.save
+      rescue Exception => e
+        if e.message =~ /11000/
+          puts "------Duplicate key error handled------"
+        else
+          raise e
+        end
+      end
+    
+    end
 
-  # PATCH/PUT /geo_messages/1
-  # PATCH/PUT /geo_messages/1.json
+    
+    if entries > 0
+      send_response("SUCCESS", "SAVE_GM", {:entries => entries.to_s}, 200)
+    else
+      send_response("FAILURE", "SAVE_GM", {:entries => entries.to_s}, 400)
+    end
+  end
+
+
   def update
     respond_to do |format|
       if @geo_message.update(geo_message_params)

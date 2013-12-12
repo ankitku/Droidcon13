@@ -9,8 +9,10 @@ development:
       # Provides the hosts the default session can connect to. Must be an array
       # of host:port pairs. (required)
       hosts:
-        - 127.0.0.1:27017
+        - 54.254.167.196:27017
       options:
+        max_retries: 1
+        retry_interval: 0
         # Change the default write concern. (default = { w: 1 })
         # write:
         # w: 1

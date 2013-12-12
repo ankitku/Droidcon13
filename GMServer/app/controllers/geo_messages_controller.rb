@@ -48,7 +48,6 @@ class GeoMessagesController < ApplicationController
       :fromUserId => gmsg[:fromUserId],
       :toUserId => gmsg[:toUserId],
       :message => gmsg[:message],
-      :msgTime => gmsg[:msgTime],
       :loc => gmsg[:loc].reverse
       )
       

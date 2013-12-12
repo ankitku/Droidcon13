@@ -21,6 +21,14 @@ class GeoMessagesController < ApplicationController
   def edit
   end
   
+  # GET /geo_messages/get_messages_posted_by_user
+  def get_messages_posted_by_user
+    userId = params[:user_id]
+
+    gmsgs = from_user_messages(userId)
+    send_response("SUCCESS", "GET_GM", {:geo_messages => gmsgs}, 200)
+  end
+  
   # GET /geo_messages/get_nearby_messages
   def get_nearby_messages
     userId = params[:user_id]

@@ -4,8 +4,8 @@ class GeoMessage
   field :fromUserId, type: String
   field :toUserId, type: String
   field :message, type: String
-  field :msgTime, type: Integer
-  
+  field :seen, type: Boolean
+    
   field :loc, :type => Array
   
   index({ loc: "2d" }, { min: -200, max: 200, name: "geo_spatial_index"})

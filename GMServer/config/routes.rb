@@ -3,6 +3,7 @@ GMServer::Application.routes.draw do
 
   post "/geo_messages/create" => "geo_messages#create"
   get "/geo_messages/get_nearby_messages" => "geo_messages#get_nearby_messages"
+  get "/geo_messages/get_messages_posted_by_user" => "geo_messages#get_messages_posted_by_user"
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

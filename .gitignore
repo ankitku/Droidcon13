@@ -6,6 +6,10 @@
 *.exe
 *.o
 *.so
+*.ap_
+*.dex
+bin
+bin/*
 
 # Packages #
 ############
@@ -18,6 +22,8 @@
 *.rar
 *.tar
 *.zip
+*.jar
+*.apk
 
 # Logs and databases #
 ######################

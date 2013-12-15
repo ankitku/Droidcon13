@@ -1,5 +1,7 @@
 package com.nkt.geomessenger;
 
+import java.util.Hashtable;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -10,7 +12,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.Uri;
+import android.graphics.Bitmap.CompressFormat;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,6 +24,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -31,12 +34,15 @@ import com.actionbarsherlock.view.MenuItem;
 import com.android.volley.Request.Method;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader.ImageContainer;
+import com.android.volley.toolbox.ImageLoader.ImageListener;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.facebook.Session;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -46,6 +52,7 @@ import com.nkt.geomessenger.constants.UrlConstants;
 import com.nkt.geomessenger.map.CustomerLocationUpdater;
 import com.nkt.geomessenger.model.GeoMessage;
 import com.nkt.geomessenger.service.PollGeoMessagesService;
+import com.nkt.geomessenger.utils.ImageCacheManager;
 
 /**
  * Callback Activity that is started from the web view activity or manually. It
@@ -56,14 +63,19 @@ import com.nkt.geomessenger.service.PollGeoMessagesService;
  */
 public class CallbackFragmentActivity extends GMActivity {
 
-	private View mResult;
-	private View mProgress;
 	private LinearLayout bottomView;
 	private Handler handler;
 	private EditText msgText;
 	private Button saveButton, friendsPicker;
 	private TextView t1, t2;
-	private boolean fieldsVisible;
+	private boolean fieldsVisible, isCentered;
+	private Hashtable<String, GeoMessage> markers = new Hashtable<String, GeoMessage>();
+
+	private static int DISK_IMAGECACHE_SIZE = 1024 * 1024 * 10;
+	private static CompressFormat DISK_IMAGECACHE_COMPRESS_FORMAT = CompressFormat.PNG;
+	private static int DISK_IMAGECACHE_QUALITY = 100; // PNG is lossless so
+														// quality is ignored
+														// but must be provided
 
 	private BroadcastReceiver receiver = new BroadcastReceiver() {
 
@@ -71,28 +83,29 @@ public class CallbackFragmentActivity extends GMActivity {
 		public void onReceive(Context context, Intent intent) {
 			Bundle bundle = intent.getExtras();
 			if (bundle != null) {
-				// String string =
-				// bundle.getString(PollGeoMessagesService.FILEPATH);
 				int resultCode = bundle.getInt(PollGeoMessagesService.RESULT);
-				if (resultCode == RESULT_OK) {
-					mapFragment.clear();
-					if (GeoMessenger.geoMessages != null) {
-						for (GeoMessage gm : GeoMessenger.geoMessages
-								.getResult()) {
-							LatLng p = new LatLng(Double.parseDouble(gm
-									.getLatitude()), Double.parseDouble(gm
-									.getLongitude()));
-							Marker m = mapFragment
-									.addMarker(new MarkerOptions()
-											.position(p)
-											.title(gm.getFromName() + " ( "
-													+ gm.getFromEmail() + " ) "
-													+ " says: ")
-											.snippet(gm.getGeoMessage()));
-							m.showInfoWindow();
+				if (isCentered) {
+					if (resultCode == 0) {
+						mapFragment.clear();
+						if (GeoMessenger.geoMessages != null) {
+							for (final GeoMessage gm : GeoMessenger.geoMessages
+									.getResult()) {
+
+								LatLng p = new LatLng(gm.getLoc()[0],
+										gm.getLoc()[1]);
+
+								final Marker m = mapFragment
+										.addMarker(new MarkerOptions()
+												.position(p)
+												.title(gm.getFromUserName())
+												.snippet(gm.getTimestamp() + ""));
+
+								markers.put(m.getId(), gm);
+							}
 						}
 					}
-				}
+				} else
+					centerMap();
 			}
 		}
 	};
@@ -109,23 +122,18 @@ public class CallbackFragmentActivity extends GMActivity {
 	 */
 	protected final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 
-	// Define a DialogFragment that displays the error dialog
 	public static class ErrorDialogFragment extends DialogFragment {
-		// Global field to contain the error dialog
 		protected Dialog mDialog;
 
-		// Default constructor. Sets the dialog field to null
 		public ErrorDialogFragment() {
 			super();
 			mDialog = null;
 		}
 
-		// Set the dialog to display
 		public void setDialog(Dialog dialog) {
 			mDialog = dialog;
 		}
 
-		// Return a Dialog to the DialogFragment.
 		@Override
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
 			return mDialog;
@@ -133,30 +141,19 @@ public class CallbackFragmentActivity extends GMActivity {
 	}
 
 	protected boolean servicesConnected() {
-		// Check that Google Play services is available
 		int resultCode = GooglePlayServicesUtil
 				.isGooglePlayServicesAvailable(this);
-		// If Google Play services is available
 		if (ConnectionResult.SUCCESS == resultCode) {
-			// In debug mode, log the status
 			Log.d("Location Updates", "Google Play services is available.");
-			// Continue
 			return true;
-			// Google Play services was not available for some reason
 		} else {
-			// Get the error code
 			int errorCode = resultCode;
-			// Get the error dialog from Google Play services
 			Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(
 					errorCode, this, CONNECTION_FAILURE_RESOLUTION_REQUEST);
 
-			// If Google Play services can provide an error dialog
 			if (errorDialog != null) {
-				// Create a new DialogFragment for the error dialog
 				ErrorDialogFragment errorFragment = new ErrorDialogFragment();
-				// Set the dialog in the DialogFragment
 				errorFragment.setDialog(errorDialog);
-				// Show the error dialog in the DialogFragment
 				errorFragment.show(getSupportFragmentManager(),
 						"Location Updates");
 			}
@@ -164,9 +161,64 @@ public class CallbackFragmentActivity extends GMActivity {
 		}
 	}
 
+	private class CustomInfoWindowAdapter implements InfoWindowAdapter {
+
+		private View view;
+
+		public CustomInfoWindowAdapter() {
+			view = getLayoutInflater().inflate(R.layout.custom_info_window,
+					null);
+		}
+
+		@Override
+		public View getInfoContents(Marker marker) {
+
+			if (marker != null && marker.isInfoWindowShown()) {
+				marker.hideInfoWindow();
+				marker.showInfoWindow();
+			}
+			return null;
+		}
+
+		@Override
+		public View getInfoWindow(final Marker marker) {
+			String url = null;
+
+			if (marker.getId() != null && markers != null && markers.size() > 0) {
+				if (markers.get(marker.getId()) != null
+						&& markers.get(marker.getId()) != null) {
+					url = markers.get(marker.getId()).getFromUserPic();
+				}
+			}
+			final ImageView icon = ((ImageView) view.findViewById(R.id.badge));
+
+			if (url != null && !url.equalsIgnoreCase("null")
+					&& !url.equalsIgnoreCase("")) {
+				loadImage(url, icon);
+			}
+
+			final String title = marker.getTitle();
+			final TextView titleUi = ((TextView) view.findViewById(R.id.title));
+			if (title != null) {
+				titleUi.setText(title);
+			} else {
+				titleUi.setText("");
+			}
+
+			final String snippet = marker.getSnippet();
+			final TextView snippetUi = ((TextView) view
+					.findViewById(R.id.snippet));
+			if (snippet != null) {
+				snippetUi.setText(snippet);
+			} else {
+				snippetUi.setText("");
+			}
+
+			return view;
+		}
+	}
+
 	private void createUIElements() {
-		mProgress = findViewById(R.id.pg_loading);
-		mResult = findViewById(R.id.ly_result);
 		bottomView = (LinearLayout) findViewById(R.id.bottom_view);
 
 		friendsPicker = (Button) findViewById(R.id.friends_picker);
@@ -208,7 +260,9 @@ public class CallbackFragmentActivity extends GMActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.callback_activity);
+
 		createUIElements();
+		createImageCache();
 
 		GeoMessenger.isGooglePlayServicesAvailable = servicesConnected();
 
@@ -218,56 +272,62 @@ public class CallbackFragmentActivity extends GMActivity {
 
 			mapFragment.getUiSettings().setCompassEnabled(true);
 			mapFragment.setMyLocationEnabled(true);
-			mapFragment.getUiSettings().setMyLocationButtonEnabled(false);
+			mapFragment.setIndoorEnabled(true);
+			mapFragment.getUiSettings().setMyLocationButtonEnabled(true);
 			mapFragment.getUiSettings().setAllGesturesEnabled(true);
 
+			mapFragment.setInfoWindowAdapter(new CustomInfoWindowAdapter());
 			initAnimations();
 		}
-
-		final Uri uri = getIntent().getData();
-		String authorizationCode = null;
-
-		// check if was started after the Intel Identity sign in
-		if (uri != null) {
-			// STEP #2: receive the /auth and get the authorization code in the
-			// callback
-			authorizationCode = uri.getQueryParameter("code");
-
-			Log.d("CallbackActivity", uri.toString());
-		}
-		// else, the activity was started directly from the MainActivity because
-		// there's an access token saved in preferences
-
-		// get the user profile
-		//GetProfileAsync async = new GetProfileAsync();
-		//async.execute(authorizationCode);
 	}
 
 	@Override
 	protected void onResume() {
-		// TODO Auto-generated method stub
 		super.onResume();
 		registerReceiver(receiver, new IntentFilter(
 				PollGeoMessagesService.NOTIFICATION));
 
-		// update messages on map
 		handler.post(new Runnable() {
-
 			@Override
 			public void run() {
-
-				centerMap();
-				handler.postDelayed(this, 4 * Constants.MILLIS_IN_A_SECOND);
+				if (!isCentered) {
+					centerMap();
+					handler.postDelayed(this, 2 * Constants.MILLIS_IN_A_SECOND);
+				} else {
+					handler.removeCallbacks(this);
+					if (!GeoMessenger.isPollServiceStarted)
+						startService();
+				}
 			}
 		});
 	}
 
 	@Override
 	protected void onPause() {
-		// TODO Auto-generated method stub
 		super.onPause();
 		// GeoMessenger.customerLocationUpdateHandler.stop();
 		unregisterReceiver(receiver);
+	}
+
+	private void createImageCache() {
+		ImageCacheManager.getInstance().init(this, this.getPackageCodePath(),
+				DISK_IMAGECACHE_SIZE, DISK_IMAGECACHE_COMPRESS_FORMAT,
+				DISK_IMAGECACHE_QUALITY);
+	}
+
+	private void loadImage(String imageUrl, final ImageView iv) {
+		ImageCacheManager.getInstance().getImage(imageUrl, new ImageListener() {
+
+			@Override
+			public void onErrorResponse(VolleyError error) {
+				iv.setImageResource(R.drawable.placeholder_contact);
+			}
+
+			@Override
+			public void onResponse(ImageContainer response, boolean isImmediate) {
+				iv.setImageBitmap(response.getBitmap());
+			}
+		});
 	}
 
 	protected void setUpMapIfNeeded() {
@@ -280,81 +340,10 @@ public class CallbackFragmentActivity extends GMActivity {
 		}
 	}
 
-	/**
-	 * Custom AsyncTask implementation to get the user profile in the background
-	 * and update the UI when needed.
-	 * 
-	 * @author durantea
-	 * 
-	 */
-	class GetProfileAsync extends AsyncTask<String, Void, String> {
-
-		@Override
-		protected String doInBackground(String... args) {
-			// final OAuthSyncManager mOAuth = new OAuthSyncManager(
-			// getApplicationContext());
-			//
-			// return mOAuth.getUserProfileThreeStep(args[0]);
-
-			return "boo";
-
-		}
-
-		@Override
-		protected void onPostExecute(String result) {
-			final String text = (result != null) ? result.toString()
-					: getString(R.string.message_result_is_null);
-
-			if (!getString(R.string.message_result_is_null).equals(text)) {
-				String[] details = text.split("\n");
-				GeoMessenger.userId = details[0];
-				GeoMessenger.userName = details[1];
-
-				startService();
-			}
-
-			// setupTable();
-
-			mResult.setVisibility(View.VISIBLE);
-			mProgress.setVisibility(View.GONE);
-
-			super.onPostExecute(result);
-		}
-	}
-
 	private void startService() {
 		Intent intent = new Intent(this, PollGeoMessagesService.class);
 		startService(intent);
-	}
-
-	/**
-	 * Custom AsyncTask implementation to reset/delete the values setted in
-	 * preferences related to the access token, refresh and time that expires
-	 * the token.
-	 * 
-	 * @author durantea
-	 * 
-	 */
-	class LogoutAsync extends AsyncTask<Void, Void, Boolean> {
-
-		@Override
-		protected Boolean doInBackground(Void... arg0) {
-			final Context mContext = getApplicationContext();
-
-			Session.getActiveSession().closeAndClearTokenInformation();
-			return true;
-		}
-
-		@Override
-		protected void onPostExecute(Boolean result) {
-			// Creates an Intent to bring back the MainActivity from the stack
-			Intent intent = new Intent(getApplicationContext(),
-					LoginFragmentActivity.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(intent);
-
-			finish();
-		}
+		GeoMessenger.isPollServiceStarted = true;
 	}
 
 	public void showFields() {
@@ -389,6 +378,26 @@ public class CallbackFragmentActivity extends GMActivity {
 		}, 400);
 	}
 
+	class LogoutAsync extends AsyncTask<Void, Void, Boolean> {
+
+		@Override
+		protected Boolean doInBackground(Void... arg0) {
+			Session.getActiveSession().closeAndClearTokenInformation();
+			return true;
+		}
+
+		@Override
+		protected void onPostExecute(Boolean result) {
+			// Creates an Intent to bring back the MainActivity from the stack
+			Intent intent = new Intent(getApplicationContext(),
+					LoginFragmentActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
+
+			finish();
+		}
+	}
+
 	public void hideFields() {
 		fieldsVisible = false;
 		bottomView.startAnimation(animateBottomViewOut);
@@ -412,16 +421,15 @@ public class CallbackFragmentActivity extends GMActivity {
 			}
 		}, 400);
 	}
-	
-	public void showFriendsPicker(View v)
-	{
-        if (Session.getActiveSession() != null &&
-                Session.getActiveSession().isOpened()) {
-            
-            Intent intent = new Intent();
-            intent.setClass(CallbackFragmentActivity.this, PickerActivity.class);
-            startActivityForResult(intent, 1);
-        }
+
+	public void showFriendsPicker(View v) {
+		if (Session.getActiveSession() != null
+				&& Session.getActiveSession().isOpened()) {
+
+			Intent intent = new Intent();
+			intent.setClass(CallbackFragmentActivity.this, PickerActivity.class);
+			startActivityForResult(intent, 1);
+		}
 	}
 
 	private void sendMessage() {
@@ -491,7 +499,8 @@ public class CallbackFragmentActivity extends GMActivity {
 		if (GeoMessenger.customerLocation != null) {
 			LatLng p = new LatLng(GeoMessenger.customerLocation.getLatitude(),
 					GeoMessenger.customerLocation.getLongitude());
-			mapFragment.moveCamera(CameraUpdateFactory.newLatLngZoom(p, 16));
+			mapFragment.moveCamera(CameraUpdateFactory.newLatLngZoom(p, 16.0f));
+			isCentered = true;
 		}
 	}
 

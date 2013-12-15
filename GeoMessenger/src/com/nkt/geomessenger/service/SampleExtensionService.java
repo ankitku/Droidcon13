@@ -116,7 +116,7 @@ public class SampleExtensionService extends ExtensionService {
 					}
 				}
 
-				handler.postDelayed(swSender,1000);
+				handler.postDelayed(swSender, 1000);
 			}
 		};
 	}
@@ -177,17 +177,17 @@ public class SampleExtensionService extends ExtensionService {
 		if (gm == null)
 			return;
 
-		String name = gm.getFromName();
+		String name = gm.getFromUserName();
 		double distance = Utils.haversine(
 				GeoMessenger.customerLocation.getLatitude(),
-				GeoMessenger.customerLocation.getLongitude(),
-				Double.parseDouble(gm.getLatitude()),
-				Double.parseDouble(gm.getLongitude()))*1000;
-		
+				GeoMessenger.customerLocation.getLongitude(), gm.getLoc()[0],
+				gm.getLoc()[1]) * 1000;
+
 		DecimalFormat df = new DecimalFormat("#.##");
 
-		String message = name + " left a message for you " + df.format(distance)
-				+ " meters away saying ->" + gm.getGeoMessage();
+		String message = name + " left a message for you "
+				+ df.format(distance) + " meters away saying ->"
+				+ gm.getMessage();
 		long time = System.currentTimeMillis();
 		long sourceId = NotificationUtil.getSourceId(this,
 				EXTENSION_SPECIFIC_ID);

@@ -16,7 +16,7 @@ import com.nkt.geomessenger.GeoMessenger;
 import com.nkt.geomessenger.constants.Constants;
 import com.nkt.geomessenger.constants.UrlConstants;
 import com.nkt.geomessenger.model.GsonConvertibleObject;
-import com.nkt.geomessenger.model.Result;
+import com.nkt.geomessenger.model.QueryGeoMessagesResult;
 
 public class PollGeoMessagesService extends IntentService {
 
@@ -46,19 +46,23 @@ public class PollGeoMessagesService extends IntentService {
 				JSONObject jsonObjectRequest = new JSONObject();
 				JSONObject request = new JSONObject();
 				try {
-					request.put("lat", GeoMessenger.customerLocation.getLatitude());
-					request.put("lng", GeoMessenger.customerLocation.getLongitude());
+					if (GeoMessenger.customerLocation != null)
+					{
+						request.put("lat",
+								GeoMessenger.customerLocation.getLatitude());
+						request.put("lng",
+								GeoMessenger.customerLocation.getLongitude());
+					}
 					request.put("radiusInMeter", 10000);
 					request.put("userEmail", GeoMessenger.userId);
 
 					jsonObjectRequest.put("action", "query-radius-user");
 					jsonObjectRequest.put("request", request);
-					
+
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-
 
 				JsonObjectRequest jsonGeoMessagesRequest = new JsonObjectRequest(
 						Method.POST, UrlConstants.getBaseUrl(),
@@ -67,22 +71,38 @@ public class PollGeoMessagesService extends IntentService {
 							@Override
 							public void onResponse(JSONObject response) {
 								result = Activity.RESULT_OK;
-								String jsonrep = response.toString();
-								GeoMessenger.geoMessages = GsonConvertibleObject.getObjectFromJson(jsonrep, Result.class);
+								// String jsonrep = response.toString();
+								// GeoMessenger.geoMessages =
+								// GsonConvertibleObject.getObjectFromJson(jsonrep,
+								// QueryGeoMessagesResult.class);
+
+								// dummy code
+								String jsonrep = "{\"status\":\"SUCCESS\",\"request_type\":\"GET_GM\",\"geo_messages\":[{\"id\":\"52aa3a57666972115d020000\",\"timestamp\":1386887767,\"loc\":[12.937091, 77.613657],\"message\":\"Love the idli here at Shanti Sagar\",\"from_user_name\":\"Ankit\",\"from_user_pic\":\"https://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash2/1118435_574458322_1969312793_q.jpg\"},{\"id\":\"52aa3a57666972115d000000\",\"timestamp\":1386887767,\"loc\":[12.937091, 77.613658],\"message\":\"Love the dosa here at Shanti Sagar\",\"from_user_name\":\"Ankit\",\"from_user_pic\":\"https://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash2/1118435_574458322_1969312793_q.jpg\"}]}";
+
+								GeoMessenger.geoMessages = GsonConvertibleObject
+										.getObjectFromJson(jsonrep,
+												QueryGeoMessagesResult.class);
+
 								publishResults(result);
 							}
 						}, new Response.ErrorListener() {
 
 							@Override
 							public void onErrorResponse(VolleyError error) {
+								
+								String jsonrep = "{\"status\":\"SUCCESS\",\"request_type\":\"GET_GM\",\"geo_messages\":[{\"id\":\"52aa3a57666972115d020000\",\"timestamp\":1386887767,\"loc\":[12.937091, 77.613657],\"message\":\"Love the idli here at Shanti Sagar\",\"from_user_name\":\"Ankit\",\"from_user_pic\":\"https://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash2/1118435_574458322_1969312793_q.jpg\"},{\"id\":\"52aa3a57666972115d000000\",\"timestamp\":1386887767,\"loc\":[12.937091, 77.613758],\"message\":\"Love the dosa here at Shanti Sagar\",\"from_user_name\":\"Ankit\",\"from_user_pic\":\"https://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash2/1118435_574458322_1969312793_q.jpg\"}]}";
+
+								GeoMessenger.geoMessages = GsonConvertibleObject
+										.getObjectFromJson(jsonrep,
+												QueryGeoMessagesResult.class);
+								
 								publishResults(result);
 							}
-
 						});
-				
+
 				GeoMessenger.queue.add(jsonGeoMessagesRequest);
 
-				handler.postDelayed(this, 5 * Constants.MILLIS_IN_A_SECOND);
+				handler.postDelayed(this, 30 * Constants.MILLIS_IN_A_SECOND);
 			}
 		});
 

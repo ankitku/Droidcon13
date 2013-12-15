@@ -57,12 +57,6 @@ public class LoginFragmentActivity extends GMActivity {
 		uiHelper = new UiLifecycleHelper(this, callback);
 		uiHelper.onCreate(savedInstanceState);
 
-		if (GeoMessenger.customerLocationUpdateHandler == null)
-			GeoMessenger.customerLocationUpdateHandler = new CustomerLocationUpdater();
-
-		GeoMessenger.customerLocationUpdateHandler
-				.start(LoginFragmentActivity.this);
-
 		String[] perms = { "email" };
 		FBLoginButton = (LoginButton) findViewById(R.id.fb_login_button);
 		FBLoginButton.setReadPermissions(Arrays.asList(perms));
@@ -90,11 +84,16 @@ public class LoginFragmentActivity extends GMActivity {
 	protected void onResume() {
 		super.onResume();
 		uiHelper.onResume();
-
 		// For scenarios where the main activity is launched and user
 		// session is not null, the session state change notification
 		// may not be triggered. Trigger it if it's open/closed.
 		updateActivity(session, session.getState());
+		
+		if (GeoMessenger.customerLocationUpdateHandler == null)
+			GeoMessenger.customerLocationUpdateHandler = new CustomerLocationUpdater();
+
+		GeoMessenger.customerLocationUpdateHandler
+				.start(LoginFragmentActivity.this);
 	}
 
 	@Override

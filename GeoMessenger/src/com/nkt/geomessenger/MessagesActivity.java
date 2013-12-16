@@ -16,6 +16,8 @@ public class MessagesActivity extends GMActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		getSupportActionBar().setTitle("Sent messages");
 		setContentView(R.layout.messages_list);
 
 		final ListView listview = (ListView) findViewById(R.id.list_view);

@@ -99,7 +99,6 @@ public class PollGeoMessagesService extends IntentService {
 								publishResults(result);
 							}
 						});
-
 				GeoMessenger.queue.add(jsonGeoMessagesRequest);
 
 				handler.postDelayed(this, 30 * Constants.MILLIS_IN_A_SECOND);

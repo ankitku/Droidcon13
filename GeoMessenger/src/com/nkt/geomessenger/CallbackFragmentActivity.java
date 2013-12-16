@@ -78,7 +78,7 @@ public class CallbackFragmentActivity extends GMActivity {
 			if (bundle != null) {
 				int resultCode = bundle.getInt(PollGeoMessagesService.RESULT);
 				if (isCentered) {
-					if (resultCode == 0) {
+					if (resultCode == RESULT_OK) {
 						mapFragment.clear();
 						if (GeoMessenger.geoMessages != null) {
 							for (final GeoMessage gm : GeoMessenger.geoMessages

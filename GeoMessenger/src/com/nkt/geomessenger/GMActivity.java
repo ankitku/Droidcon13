@@ -155,6 +155,10 @@ public class GMActivity extends SherlockFragmentActivity {
 			startActivity(intent);
 			break;
 		}
+		case FEEDBACK: {
+			sendFeedback();
+			break;
+		}
 		}
 	}
 
@@ -226,6 +230,31 @@ public class GMActivity extends SherlockFragmentActivity {
 
 			finish();
 		}
+	}
+
+	public void sendFeedback() {
+		Intent intent = new Intent(android.content.Intent.ACTION_SEND);
+		String emailTo[] = { GeoMessenger.emailFeedback };
+		intent.putExtra(android.content.Intent.EXTRA_EMAIL, emailTo);
+
+		String version = GeoMessenger.versionName.substring(0, 5);
+
+		intent.putExtra(Intent.EXTRA_SUBJECT, "Feedback on GeoMessenger " + version
+				+ " for Android");
+
+		// Device Data
+		String phoneModel = android.os.Build.MODEL;
+		String phoneDevice = android.os.Build.DEVICE;
+		String androidVersion = android.os.Build.VERSION.RELEASE;
+
+		intent.putExtra(Intent.EXTRA_TEXT,
+				"\n\n\n-------------------------\nGeoMessenger Android "
+						+ version + " on " + phoneModel + " " + phoneDevice
+						+ " running Android " + androidVersion + " user_id : "
+						+ GeoMessenger.userId);
+
+		intent.setType("plain/text");
+		startActivity(Intent.createChooser(intent, "Send your email from:"));
 	}
 
 	private boolean isConnectivityAvailable() {

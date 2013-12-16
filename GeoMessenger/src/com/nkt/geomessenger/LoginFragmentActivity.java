@@ -135,12 +135,12 @@ public class LoginFragmentActivity extends GMActivity {
 		if (isRunning()) {
 			if (SessionState.OPENED.equals(state)) {
 
-				// makeFBRequests(session);
+				makeFBRequests(session);
 				Intent intent = new Intent();
 				intent.setClass(LoginFragmentActivity.this,
 						CallbackFragmentActivity.class);
 				startActivity(intent);
-
+				finish();
 			} else if (Session.getActiveSession() != null
 					&& Session.getActiveSession().isClosed()) {
 				return;
@@ -193,7 +193,8 @@ public class LoginFragmentActivity extends GMActivity {
 							if (user != null) {
 
 								GeoMessenger.userId = user.getId();
-								Request.executeBatchAsync(myFriendsRequest);
+								GeoMessenger.userName = user.getName();
+								//Request.executeBatchAsync(myFriendsRequest);
 							}
 						}
 						if (response.getError() != null) {

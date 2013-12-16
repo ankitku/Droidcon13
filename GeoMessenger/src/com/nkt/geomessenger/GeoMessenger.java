@@ -57,4 +57,10 @@ public class GeoMessenger {
 	public static boolean isPollServiceStarted;
 	
 	public static Typeface robotoThin;
+
+	public static String emailFeedback = "ankitkumar.itbhu@gmail.com";
+
+	public static String versionName;
+
+	public static int versionCode;
 }

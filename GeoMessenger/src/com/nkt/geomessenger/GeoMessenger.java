@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import android.graphics.Typeface;
 import android.location.Location;
 
 import com.android.volley.RequestQueue;
@@ -54,4 +55,6 @@ public class GeoMessenger {
 	public static HashSet<GeoMessage> messagesSentToWatch = new HashSet<GeoMessage>();
 	
 	public static boolean isPollServiceStarted;
+	
+	public static Typeface robotoThin;
 }

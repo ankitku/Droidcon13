@@ -197,7 +197,7 @@ public class SampleExtensionService extends ExtensionService {
 		}
 
 		String profileImage = ExtensionUtils.getUriString(this,
-				R.drawable.widget_default_userpic_bg);
+				R.drawable.placeholder_contact);
 
 		ContentValues eventValues = new ContentValues();
 		eventValues.put(Notification.EventColumns.EVENT_READ_STATUS, false);

@@ -54,13 +54,6 @@ import com.nkt.geomessenger.model.GeoMessage;
 import com.nkt.geomessenger.service.PollGeoMessagesService;
 import com.nkt.geomessenger.utils.ImageCacheManager;
 
-/**
- * Callback Activity that is started from the web view activity or manually. It
- * handles the user profile once the access code is given.
- * 
- * @author durantea
- * 
- */
 public class CallbackFragmentActivity extends GMActivity {
 
 	private LinearLayout bottomView;
@@ -259,6 +252,7 @@ public class CallbackFragmentActivity extends GMActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		getSupportActionBar().setTitle("Nearby Messages");
 		setContentView(R.layout.callback_activity);
 
 		createUIElements();
@@ -378,26 +372,6 @@ public class CallbackFragmentActivity extends GMActivity {
 		}, 400);
 	}
 
-	class LogoutAsync extends AsyncTask<Void, Void, Boolean> {
-
-		@Override
-		protected Boolean doInBackground(Void... arg0) {
-			Session.getActiveSession().closeAndClearTokenInformation();
-			return true;
-		}
-
-		@Override
-		protected void onPostExecute(Boolean result) {
-			// Creates an Intent to bring back the MainActivity from the stack
-			Intent intent = new Intent(getApplicationContext(),
-					LoginFragmentActivity.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(intent);
-
-			finish();
-		}
-	}
-
 	public void hideFields() {
 		fieldsVisible = false;
 		bottomView.startAnimation(animateBottomViewOut);
@@ -511,17 +485,6 @@ public class CallbackFragmentActivity extends GMActivity {
 		action_signout = (MenuItem) menu.findItem(R.id.action_signout);
 		menu_legalnotices = (MenuItem) menu.findItem(R.id.menu_legalnotices);
 		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.action_signout:
-			LogoutAsync async = new LogoutAsync();
-			async.execute();
-			break;
-		}
-		return super.onOptionsItemSelected(item);
 	}
 
 	@Override

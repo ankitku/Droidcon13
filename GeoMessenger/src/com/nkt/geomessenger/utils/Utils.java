@@ -1,5 +1,10 @@
 package com.nkt.geomessenger.utils;
 
+import java.util.List;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
+
 public class Utils {
 	
     public static final double R = 6372.8; // In kilometers
@@ -13,5 +18,29 @@ public class Utils {
         double c = 2 * Math.asin(Math.sqrt(a));
         return R * c;
     }
+    
+	public static boolean isEmpty(String s) {
+		return s == null || s.length() == 0;
+	}
 
+	public static <T> boolean isOneOf(T item, T... items) {
+		for (T t : items) {
+			if (item.equals(t))
+				return true;
+		}
+		return false;
+
+	}
+
+	public static String getFilledUrl(String url, List<NameValuePair> list) {
+		if (!url.endsWith("?"))
+			url += "?";
+
+		if (list == null)
+			return url;
+
+		String paramString = URLEncodedUtils.format(list, "utf-8");
+		url += paramString;
+		return url;
+	}
 }

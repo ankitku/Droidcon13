@@ -13,7 +13,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap.CompressFormat;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.DialogFragment;
@@ -22,6 +21,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -38,6 +38,7 @@ import com.android.volley.toolbox.ImageLoader.ImageContainer;
 import com.android.volley.toolbox.ImageLoader.ImageListener;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.facebook.Session;
+import com.facebook.model.GraphUser;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -53,16 +54,19 @@ import com.nkt.geomessenger.map.CustomerLocationUpdater;
 import com.nkt.geomessenger.model.GeoMessage;
 import com.nkt.geomessenger.service.PollGeoMessagesService;
 import com.nkt.geomessenger.utils.ImageCacheManager;
+import com.nkt.views.FlowLayout;
 
 public class CallbackFragmentActivity extends GMActivity {
 
-	private LinearLayout bottomView;
+	private LinearLayout bottomViewLayout, sendOptionsLayout;
+	private FlowLayout friendsPickerLayout;
 	private Handler handler;
-	private EditText msgText;
-	private Button saveButton, friendsPicker;
-	private TextView t1, t2;
+	private EditText messageText;
+	private Button saveButton;
 	private boolean fieldsVisible, isCentered;
 	private Hashtable<String, GeoMessage> markers = new Hashtable<String, GeoMessage>();
+
+	private static final int GET_SELECTED_FRIENDS = 1;
 
 	private static int DISK_IMAGECACHE_SIZE = 1024 * 1024 * 10;
 	private static CompressFormat DISK_IMAGECACHE_COMPRESS_FORMAT = CompressFormat.PNG;
@@ -212,14 +216,12 @@ public class CallbackFragmentActivity extends GMActivity {
 	}
 
 	private void createUIElements() {
-		bottomView = (LinearLayout) findViewById(R.id.bottom_view);
+		bottomViewLayout = (LinearLayout) findViewById(R.id.bottom_view);
+		friendsPickerLayout = (FlowLayout) findViewById(R.id.friends_picker);
+		sendOptionsLayout = (LinearLayout) findViewById(R.id.send_options);
 
-		friendsPicker = (Button) findViewById(R.id.friends_picker);
-		msgText = (EditText) findViewById(R.id.msg_text);
+		messageText = (EditText) findViewById(R.id.msg_text);
 		saveButton = (Button) findViewById(R.id.btn_save);
-
-		t1 = (TextView) findViewById(R.id.t1);
-		t2 = (TextView) findViewById(R.id.t2);
 
 		saveButton.setOnClickListener(new OnClickListener() {
 
@@ -342,7 +344,7 @@ public class CallbackFragmentActivity extends GMActivity {
 
 	public void showFields() {
 		fieldsVisible = true;
-		bottomView.startAnimation(animateBottomViewOut);
+		bottomViewLayout.startAnimation(animateBottomViewOut);
 
 		saveButton.setOnClickListener(new OnClickListener() {
 
@@ -360,12 +362,8 @@ public class CallbackFragmentActivity extends GMActivity {
 
 					@Override
 					public void run() {
-						t1.setVisibility(View.VISIBLE);
-						t2.setVisibility(View.VISIBLE);
-						friendsPicker.setVisibility(View.VISIBLE);
-						msgText.setVisibility(View.VISIBLE);
-
-						bottomView.startAnimation(animateBottomViewIn);
+						sendOptionsLayout.setVisibility(View.VISIBLE);
+						bottomViewLayout.startAnimation(animateBottomViewIn);
 					}
 				});
 			}
@@ -374,7 +372,11 @@ public class CallbackFragmentActivity extends GMActivity {
 
 	public void hideFields() {
 		fieldsVisible = false;
-		bottomView.startAnimation(animateBottomViewOut);
+		bottomViewLayout.startAnimation(animateBottomViewOut);
+
+		GeoMessenger.getSelectedUsers().clear();
+		friendsPickerLayout.removeAllViews();
+		messageText.setText("");
 
 		handler.postDelayed(new Runnable() {
 
@@ -384,12 +386,8 @@ public class CallbackFragmentActivity extends GMActivity {
 
 					@Override
 					public void run() {
-						t1.setVisibility(View.GONE);
-						t2.setVisibility(View.GONE);
-						friendsPicker.setVisibility(View.GONE);
-						msgText.setVisibility(View.GONE);
-
-						bottomView.startAnimation(animateBottomViewIn);
+						sendOptionsLayout.setVisibility(View.GONE);
+						bottomViewLayout.startAnimation(animateBottomViewIn);
 					}
 				});
 			}
@@ -400,16 +398,19 @@ public class CallbackFragmentActivity extends GMActivity {
 		if (Session.getActiveSession() != null
 				&& Session.getActiveSession().isOpened()) {
 
+			GeoMessenger.getSelectedUsers().clear();
+			friendsPickerLayout.removeAllViews();
+
 			Intent intent = new Intent();
 			intent.setClass(CallbackFragmentActivity.this, PickerActivity.class);
-			startActivityForResult(intent, 1);
+			startActivityForResult(intent, GET_SELECTED_FRIENDS);
 		}
 	}
 
 	private void sendMessage() {
 
 		String email = "lol";
-		String msg = msgText.getText().toString();
+		String msg = messageText.getText().toString();
 
 		JSONObject jsonObjectRequest = new JSONObject();
 		JSONObject request = new JSONObject();
@@ -437,7 +438,7 @@ public class CallbackFragmentActivity extends GMActivity {
 					public void onResponse(JSONObject response) {
 						hideFields();
 						showAlertDialog();
-						msgText.setText("");
+						messageText.setText("");
 						saveButton.setOnClickListener(new OnClickListener() {
 
 							@Override
@@ -456,6 +457,37 @@ public class CallbackFragmentActivity extends GMActivity {
 				});
 
 		GeoMessenger.queue.add(jsonGeoMessagesRequest);
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == GET_SELECTED_FRIENDS) {
+			if (resultCode == RESULT_OK) {
+				for (GraphUser g : GeoMessenger.getSelectedUsers()) {
+					TextView tv = new TextView(CallbackFragmentActivity.this);
+					tv.setText(g.getName());
+					tv.setTextColor(getResources().getColor(R.color.white));
+					tv.setBackgroundColor(getResources().getColor(R.color.blue));
+					tv.setPadding(5, 2, 5, 5);
+
+					LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+							LinearLayout.LayoutParams.WRAP_CONTENT,
+							LinearLayout.LayoutParams.WRAP_CONTENT);
+					layoutParams.setMargins(5, 0, 5, 5);
+					tv.setLayoutParams(layoutParams);
+
+					friendsPickerLayout.addView(tv);
+				}
+
+				if (GeoMessenger.getSelectedUsers().size() > 0) {
+					if (messageText.requestFocus()) {
+						InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,
+								InputMethodManager.HIDE_IMPLICIT_ONLY);
+					}
+				}
+			}
+		}
 	}
 
 	private void showAlertDialog() {

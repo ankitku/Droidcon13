@@ -42,9 +42,9 @@ public class GeoMessenger {
 
 	public static QueryGeoMessagesResult geoMessages;
 
-	private static List<GraphUser> selectedUsers;
+	private static List<GraphUser> selectedUsers = new ArrayList<GraphUser>();
 
-	public List<GraphUser> getSelectedUsers() {
+	public static List<GraphUser> getSelectedUsers() {
 		return selectedUsers;
 	}
 

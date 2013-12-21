@@ -40,6 +40,7 @@ public class PickerActivity extends SherlockFragmentActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.pickers);
+		getSupportActionBar().hide();
 
 		Bundle args = getIntent().getExtras();
 		FragmentManager manager = getSupportFragmentManager();

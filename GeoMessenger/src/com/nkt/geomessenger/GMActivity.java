@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Bitmap.CompressFormat;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -22,16 +23,21 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader.ImageContainer;
+import com.android.volley.toolbox.ImageLoader.ImageListener;
 import com.facebook.FacebookRequestError;
 import com.facebook.Session;
 import com.nkt.geomessenger.constants.GMConstants;
 import com.nkt.geomessenger.model.ListItemWithIcon;
 import com.nkt.geomessenger.model.ListviewAdapter;
+import com.nkt.geomessenger.utils.ImageCacheManager;
 
 public class GMActivity extends SherlockFragmentActivity {
 
@@ -46,10 +52,15 @@ public class GMActivity extends SherlockFragmentActivity {
 
 	private CharSequence mDrawerTitle;
 	private CharSequence mTitle;
-	
+
 	private static final Uri M_FACEBOOK_URL = Uri
 			.parse("http://m.facebook.com");
 
+	protected static int DISK_IMAGECACHE_SIZE = 1024 * 1024 * 10;
+	protected static CompressFormat DISK_IMAGECACHE_COMPRESS_FORMAT = CompressFormat.PNG;
+	protected static int DISK_IMAGECACHE_QUALITY = 100; // PNG is lossless so
+														// quality is ignored
+														// but must be provided
 	private Handler handler = new Handler();
 
 	public boolean isRunning() {
@@ -161,11 +172,13 @@ public class GMActivity extends SherlockFragmentActivity {
 			startActivity(intent);
 			break;
 		}
-		case FEEDBACK: {
+		case FEEDBACK:
 			sendFeedback();
-			break;
+			
 		}
-		}
+
+		if (!"MapActivity".equals(getActivityLabel().toString()))
+			finish();
 	}
 
 	/**
@@ -332,6 +345,27 @@ public class GMActivity extends SherlockFragmentActivity {
 					.setPositiveButton(R.string.okay, listener)
 					.setTitle(R.string.generic_error).setMessage(dialogBody)
 					.show();
+	}
+
+	protected void createImageCache() {
+		ImageCacheManager.getInstance().init(this, this.getPackageCodePath(),
+				DISK_IMAGECACHE_SIZE, DISK_IMAGECACHE_COMPRESS_FORMAT,
+				DISK_IMAGECACHE_QUALITY);
+	}
+
+	protected void loadImage(String imageUrl, final ImageView iv) {
+		ImageCacheManager.getInstance().getImage(imageUrl, new ImageListener() {
+
+			@Override
+			public void onErrorResponse(VolleyError error) {
+				iv.setImageResource(R.drawable.placeholder_contact);
+			}
+
+			@Override
+			public void onResponse(ImageContainer response, boolean isImmediate) {
+				iv.setImageBitmap(response.getBitmap());
+			}
+		});
 	}
 
 	private boolean isConnectivityAvailable() {

@@ -26,17 +26,14 @@ import com.nkt.geomessenger.utils.Utils;
 
 public class PollGeoMessagesService extends IntentService {
 
-	private int result = Activity.RESULT_CANCELED;
-	public static final String URL = "urlpath";
-	public static final String FILENAME = "filename";
-	public static final String FILEPATH = "filepath";
+	private int result;
 	public static final String RESULT = "result";
 	public static final String NOTIFICATION = "com.nkt.geomessenger.service";
 
 	private static Handler handler = new Handler();
 
 	public PollGeoMessagesService() {
-		super("DownloadService");
+		super("PollGeoMessagesService");
 	}
 
 	// will be called asynchronously by Android

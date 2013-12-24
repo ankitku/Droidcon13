@@ -14,7 +14,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Bitmap.CompressFormat;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.DialogFragment;
@@ -72,12 +71,6 @@ public class MapActivity extends GMActivity {
 	private Hashtable<String, GeoMessage> markers = new Hashtable<String, GeoMessage>();
 
 	private static final int GET_SELECTED_FRIENDS = 1;
-
-	private static int DISK_IMAGECACHE_SIZE = 1024 * 1024 * 10;
-	private static CompressFormat DISK_IMAGECACHE_COMPRESS_FORMAT = CompressFormat.PNG;
-	private static int DISK_IMAGECACHE_QUALITY = 100; // PNG is lossless so
-														// quality is ignored
-														// but must be provided
 
 	private BroadcastReceiver receiver = new BroadcastReceiver() {
 
@@ -316,27 +309,6 @@ public class MapActivity extends GMActivity {
 		super.onPause();
 		// GeoMessenger.customerLocationUpdateHandler.stop();
 		unregisterReceiver(receiver);
-	}
-
-	private void createImageCache() {
-		ImageCacheManager.getInstance().init(this, this.getPackageCodePath(),
-				DISK_IMAGECACHE_SIZE, DISK_IMAGECACHE_COMPRESS_FORMAT,
-				DISK_IMAGECACHE_QUALITY);
-	}
-
-	private void loadImage(String imageUrl, final ImageView iv) {
-		ImageCacheManager.getInstance().getImage(imageUrl, new ImageListener() {
-
-			@Override
-			public void onErrorResponse(VolleyError error) {
-				iv.setImageResource(R.drawable.placeholder_contact);
-			}
-
-			@Override
-			public void onResponse(ImageContainer response, boolean isImmediate) {
-				iv.setImageBitmap(response.getBitmap());
-			}
-		});
 	}
 
 	protected void setUpMapIfNeeded() {

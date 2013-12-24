@@ -7,11 +7,11 @@ public class GeoMessage extends GsonConvertibleObject {
 	private double[] loc;
 
 	private String fromUserName;
-	private String fromUserPic;
-	
+	private String fromUserId;
+
 	private String toUserName;
-	private String toUserPic;
-	
+	private String toUserId;
+
 	public String getId() {
 		return id;
 	}
@@ -33,7 +33,7 @@ public class GeoMessage extends GsonConvertibleObject {
 	}
 
 	public String getFromUserPic() {
-		return fromUserPic;
+		return "http://graph.facebook.com/"+ fromUserId + "/picture?type=small";
 	}
 
 	public String getToUserName() {
@@ -41,7 +41,7 @@ public class GeoMessage extends GsonConvertibleObject {
 	}
 
 	public String getToUserPic() {
-		return toUserPic;
+		return "http://graph.facebook.com/"+ toUserId + "/picture?type=small";
 	}
 
 	@Override

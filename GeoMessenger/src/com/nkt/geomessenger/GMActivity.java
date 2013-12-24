@@ -115,14 +115,10 @@ public class GMActivity extends SherlockFragmentActivity {
 				GravityCompat.START);
 
 		final List<ListItemWithIcon> tabs = new ArrayList<ListItemWithIcon>();
-		tabs.add(new ListItemWithIcon(R.drawable.placeholder_contact,
-				"Nearby Messages", null));
-		tabs.add(new ListItemWithIcon(R.drawable.placeholder_contact, "Sent",
-				null));
-		tabs.add(new ListItemWithIcon(R.drawable.placeholder_contact,
-				"Invite Friends", null));
-		tabs.add(new ListItemWithIcon(R.drawable.placeholder_contact,
-				"Feedback", null));
+		tabs.add(new ListItemWithIcon(0, "Nearby Messages", null));
+		tabs.add(new ListItemWithIcon(0, "Sent", null));
+		tabs.add(new ListItemWithIcon(0, "Invite Friends", null));
+		tabs.add(new ListItemWithIcon(0, "Feedback", null));
 		ListviewAdapter menuAdapter = new ListviewAdapter(GMActivity.this, tabs);
 
 		mDrawerList.setAdapter(menuAdapter);
@@ -174,7 +170,7 @@ public class GMActivity extends SherlockFragmentActivity {
 		}
 		case FEEDBACK:
 			sendFeedback();
-			
+
 		}
 
 		if (!"MapActivity".equals(getActivityLabel().toString()))

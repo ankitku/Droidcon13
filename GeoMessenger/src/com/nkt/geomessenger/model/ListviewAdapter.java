@@ -62,7 +62,10 @@ public class ListviewAdapter extends BaseAdapter {
 			subtitleText.setVisibility(View.GONE);
 
 		ImageView picIcon = (ImageView) convertView.findViewById(R.id.pic);
-		picIcon.setImageResource(entry.getId());
+		if (entry.getId() == 0)
+			picIcon.setVisibility(View.GONE);
+		else
+			picIcon.setImageResource(entry.getId());
 
 		return convertView;
 	}

@@ -1,6 +1,8 @@
 package com.nkt.geomessenger.utils;
 
+import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -42,5 +44,20 @@ public class Utils {
 		String paramString = URLEncodedUtils.format(list, "utf-8");
 		url += paramString;
 		return url;
+	}
+	
+	public static long diff(long time, int field) {
+		long fieldTime = getFieldInMillis(field);
+		Calendar cal = Calendar.getInstance();
+		long now = cal.getTimeInMillis();
+		return (time / fieldTime - now / fieldTime);
+	}
+
+	private static final long getFieldInMillis(int field) {
+		final Calendar cal = Calendar.getInstance();
+		long now = cal.getTimeInMillis();
+		cal.add(field, 1);
+		long after = cal.getTimeInMillis();
+		return after - now;
 	}
 }

@@ -35,8 +35,6 @@ import com.actionbarsherlock.view.MenuItem;
 import com.android.volley.Request.Method;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageLoader.ImageContainer;
-import com.android.volley.toolbox.ImageLoader.ImageListener;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.facebook.Request;
 import com.facebook.Session;
@@ -55,7 +53,6 @@ import com.nkt.geomessenger.constants.UrlConstants;
 import com.nkt.geomessenger.map.CustomerLocationUpdater;
 import com.nkt.geomessenger.model.GeoMessage;
 import com.nkt.geomessenger.service.PollGeoMessagesService;
-import com.nkt.geomessenger.utils.ImageCacheManager;
 import com.nkt.views.FlowLayout;
 
 public class MapActivity extends GMActivity {
@@ -459,7 +456,7 @@ public class MapActivity extends GMActivity {
 					TextView tv = new TextView(MapActivity.this);
 					tv.setText(g.getName());
 					tv.setTextColor(getResources().getColor(R.color.white));
-					tv.setBackgroundColor(getResources().getColor(R.color.blue));
+					tv.setBackgroundDrawable(getResources().getDrawable(R.drawable.blue_round_corners));
 					tv.setPadding(5, 2, 5, 5);
 
 					LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(

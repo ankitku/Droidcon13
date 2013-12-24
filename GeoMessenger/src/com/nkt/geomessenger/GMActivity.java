@@ -6,10 +6,12 @@ import java.util.List;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -25,6 +27,7 @@ import android.widget.ListView;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
+import com.facebook.FacebookRequestError;
 import com.facebook.Session;
 import com.nkt.geomessenger.constants.GMConstants;
 import com.nkt.geomessenger.model.ListItemWithIcon;
@@ -43,6 +46,9 @@ public class GMActivity extends SherlockFragmentActivity {
 
 	private CharSequence mDrawerTitle;
 	private CharSequence mTitle;
+	
+	private static final Uri M_FACEBOOK_URL = Uri
+			.parse("http://m.facebook.com");
 
 	private Handler handler = new Handler();
 
@@ -224,7 +230,7 @@ public class GMActivity extends SherlockFragmentActivity {
 		protected void onPostExecute(Boolean result) {
 			// Creates an Intent to bring back the MainActivity from the stack
 			Intent intent = new Intent(getApplicationContext(),
-					LoginFragmentActivity.class);
+					LoginActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
 
@@ -239,8 +245,8 @@ public class GMActivity extends SherlockFragmentActivity {
 
 		String version = GeoMessenger.versionName.substring(0, 5);
 
-		intent.putExtra(Intent.EXTRA_SUBJECT, "Feedback on GeoMessenger " + version
-				+ " for Android");
+		intent.putExtra(Intent.EXTRA_SUBJECT, "Feedback on GeoMessenger "
+				+ version + " for Android");
 
 		// Device Data
 		String phoneModel = android.os.Build.MODEL;
@@ -255,6 +261,77 @@ public class GMActivity extends SherlockFragmentActivity {
 
 		intent.setType("plain/text");
 		startActivity(Intent.createChooser(intent, "Send your email from:"));
+	}
+
+	protected void handleError(FacebookRequestError error) {
+		DialogInterface.OnClickListener listener = null;
+		String dialogBody = null;
+
+		if (error == null) {
+			dialogBody = getString(R.string.generic_error);
+		} else {
+			switch (error.getCategory()) {
+			case AUTHENTICATION_RETRY:
+				// tell the user what happened by getting the message id, and
+				// retry the operation later
+				String userAction = (error.shouldNotifyUser()) ? ""
+						: getString(error.getUserActionMessageId());
+				dialogBody = getString(R.string.error_authentication_retry,
+						userAction);
+				listener = new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialogInterface, int i) {
+						Intent intent = new Intent(Intent.ACTION_VIEW,
+								M_FACEBOOK_URL);
+						startActivity(intent);
+					}
+				};
+				break;
+
+			case AUTHENTICATION_REOPEN_SESSION:
+				// close the session and reopen it.
+				dialogBody = getString(R.string.error_authentication_reopen);
+				listener = new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialogInterface, int i) {
+						Session session = Session.getActiveSession();
+						if (session != null && !session.isClosed()) {
+							session.closeAndClearTokenInformation();
+						}
+					}
+				};
+				break;
+
+			case SERVER:
+			case THROTTLING:
+				// this is usually temporary, don't clear the fields, and
+				// ask the user to try again
+				dialogBody = getString(R.string.error_server);
+				break;
+
+			case BAD_REQUEST:
+				// this is likely a coding error, ask the user to file a bug
+				dialogBody = getString(R.string.error_bad_request,
+						error.getErrorMessage());
+				break;
+
+			case OTHER:
+			case CLIENT:
+			default:
+				// an unknown issue occurred, this could be a code error, or
+				// a server side issue, log the issue, and either ask the
+				// user to retry, or file a bug
+				dialogBody = getString(R.string.error_unknown,
+						error.getErrorMessage());
+				break;
+			}
+		}
+
+		if (isRunning())
+			new AlertDialog.Builder(this)
+					.setPositiveButton(R.string.okay, listener)
+					.setTitle(R.string.generic_error).setMessage(dialogBody)
+					.show();
 	}
 
 	private boolean isConnectivityAvailable() {

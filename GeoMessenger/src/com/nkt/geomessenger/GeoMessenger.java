@@ -8,19 +8,17 @@ import android.graphics.Typeface;
 import android.location.Location;
 
 import com.android.volley.RequestQueue;
-import com.facebook.model.GraphPlace;
 import com.facebook.model.GraphUser;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.nkt.geomessenger.map.CustomerLocationUpdater;
-import com.nkt.geomessenger.model.FBFriend;
 import com.nkt.geomessenger.model.GeoMessage;
 import com.nkt.geomessenger.model.QueryGeoMessagesResult;
 
 public class GeoMessenger {
 
-	public final static String TAG = CallbackFragmentActivity.class
+	public final static String TAG = MapActivity.class
 			.getSimpleName();
 
 	public static RequestQueue queue;
@@ -28,8 +26,6 @@ public class GeoMessenger {
 	public static String userName;
 
 	public static String userId;
-
-	public static List<FBFriend> userFriends = new ArrayList<FBFriend>();
 
 	public static Gson gson = new GsonBuilder().setFieldNamingPolicy(
 			FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();

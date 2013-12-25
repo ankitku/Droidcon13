@@ -11,6 +11,7 @@
     <color name="separator">#EEEEEE</color>
     <color name="dark_green">#049051</color>
     <color name="dark_red">#EF3024</color>
+    <color name="darker_red">#BB1512</color>
     <color name="blue">#0F99FF</color>
     <color name="light_blue">#ACC4E7</color>
     <color name="page_background">#E8E8E8</color>

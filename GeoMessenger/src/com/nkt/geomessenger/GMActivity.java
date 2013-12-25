@@ -1,6 +1,7 @@
 package com.nkt.geomessenger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import android.app.AlertDialog;
@@ -52,6 +53,9 @@ public class GMActivity extends SherlockFragmentActivity {
 
 	private CharSequence mDrawerTitle;
 	private CharSequence mTitle;
+	
+	private String childActivities[] = { "LoginActivity", "MessageDetailsActivity" };
+	private List<String> childActivitiesList = Arrays.asList(childActivities);
 
 	private static final Uri M_FACEBOOK_URL = Uri
 			.parse("http://m.facebook.com");
@@ -157,6 +161,13 @@ public class GMActivity extends SherlockFragmentActivity {
 			}
 		};
 		mDrawerToggle.setDrawerIndicatorEnabled(true);
+		
+		if (childActivitiesList.contains(getActivityLabel())) {
+			mDrawerToggle.setDrawerIndicatorEnabled(false);
+			mDrawerLayout
+					.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+		}
+		
 		mDrawerLayout.setDrawerListener(mDrawerToggle);
 	}
 

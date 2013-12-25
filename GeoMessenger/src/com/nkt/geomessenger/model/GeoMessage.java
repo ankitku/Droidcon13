@@ -11,6 +11,8 @@ public class GeoMessage extends GsonConvertibleObject {
 
 	private String toUserName;
 	private String toUserId;
+	
+	private boolean seen;
 
 	public String getId() {
 		return id;
@@ -42,6 +44,10 @@ public class GeoMessage extends GsonConvertibleObject {
 
 	public String getToUserPic() {
 		return "http://graph.facebook.com/"+ toUserId + "/picture?type=small";
+	}
+	
+	public boolean getSeenStatus() {
+		return seen;
 	}
 
 	@Override

@@ -47,6 +47,8 @@ public class GeoMessenger {
 	public static void setSelectedUsers(List<GraphUser> users) {
 		selectedUsers = users;
 	}
+	
+	public static GeoMessage selectedGeoMessage;
 
 	public static HashSet<GeoMessage> messagesSentToWatch = new HashSet<GeoMessage>();
 	

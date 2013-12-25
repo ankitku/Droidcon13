@@ -11,9 +11,11 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
@@ -82,7 +84,7 @@ public class MessagesActivity extends GMActivity {
 
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent) {
-				GeoMessage entry = getItem(position);
+				final GeoMessage entry = getItem(position);
 				if (convertView == null) {
 					LayoutInflater inflater = (LayoutInflater) MessagesActivity.this
 							.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -97,30 +99,8 @@ public class MessagesActivity extends GMActivity {
 				TextView subtitleText = (TextView) convertView
 						.findViewById(R.id.subtitleText);
 
-				Date date = new Date(entry.getTimestamp() * 1000);
-				StringBuilder sb = new StringBuilder();
-
-				SimpleDateFormat time_format = new SimpleDateFormat("hh:mm a ");
-				SimpleDateFormat date_format = new SimpleDateFormat(
-						"EEE, dd MMM");
-
-				sb.append("sent at " + time_format.format(date) + ", ");
-
-				String pickupdaytext = null;
-				int pickuptimestatus = (int) Utils.diff(date.getTime(),
-						Calendar.DAY_OF_YEAR);
-
-				if (pickuptimestatus == 0)
-					pickupdaytext = "Today";
-				else if (pickuptimestatus == -1)
-					pickupdaytext = "Yesterday";
-				else if (pickuptimestatus == 1)
-					pickupdaytext = "Tomorrow";
-				else {
-					pickupdaytext = date_format.format(date);
-				}
-				sb.append(pickupdaytext);
-				subtitleText.setText(sb);
+				String humanReadableTime = Utils.getHumanReadableTime(entry.getTimestamp());
+				subtitleText.setText(humanReadableTime);
 
 				ImageView picIcon = (ImageView) convertView
 						.findViewById(R.id.pic);
@@ -130,6 +110,26 @@ public class MessagesActivity extends GMActivity {
 						&& !url.equalsIgnoreCase("")) {
 					loadImage(url, picIcon);
 				}
+				
+				if (entry.getSeenStatus())
+				{convertView.setBackgroundColor(getResources().getColor(
+						R.color.blue));
+				nameText.setTextColor(getResources().getColor(
+						R.color.white));
+				subtitleText.setTextColor(getResources().getColor(
+						R.color.white));
+				}
+				
+				convertView.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View arg0) {
+						GeoMessenger.selectedGeoMessage = entry;
+						Intent intent = new Intent(MessagesActivity.this,
+								MessageDetailsActivity.class);
+						startActivity(intent);
+					}
+				});
 
 				return convertView;
 			}

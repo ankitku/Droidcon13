@@ -53,6 +53,7 @@ import com.nkt.geomessenger.constants.UrlConstants;
 import com.nkt.geomessenger.map.CustomerLocationUpdater;
 import com.nkt.geomessenger.model.GeoMessage;
 import com.nkt.geomessenger.service.PollGeoMessagesService;
+import com.nkt.geomessenger.utils.Utils;
 import com.nkt.views.FlowLayout;
 
 public class MapActivity extends GMActivity {
@@ -90,7 +91,9 @@ public class MapActivity extends GMActivity {
 										.addMarker(new MarkerOptions()
 												.position(p)
 												.title(gm.getFromUserName())
-												.snippet(gm.getTimestamp() + ""));
+												.snippet(
+														Utils.getHumanReadableTime(gm
+																.getTimestamp())));
 
 								markers.put(m.getId(), gm);
 							}
@@ -214,7 +217,7 @@ public class MapActivity extends GMActivity {
 
 		mProgress = findViewById(R.id.pg_loading);
 		mResult = findViewById(R.id.ly_result);
-		
+
 		mProgress.setVisibility(View.VISIBLE);
 		mResult.setVisibility(View.GONE);
 
@@ -257,7 +260,7 @@ public class MapActivity extends GMActivity {
 		super.onCreate(savedInstanceState);
 		getSupportActionBar().setTitle("Nearby Messages");
 		setContentView(R.layout.main_activity);
-		
+
 		makeFBRequests(Session.getActiveSession());
 
 		createUIElements();
@@ -456,7 +459,8 @@ public class MapActivity extends GMActivity {
 					TextView tv = new TextView(MapActivity.this);
 					tv.setText(g.getName());
 					tv.setTextColor(getResources().getColor(R.color.white));
-					tv.setBackgroundDrawable(getResources().getDrawable(R.drawable.blue_round_corners));
+					tv.setBackgroundDrawable(getResources().getDrawable(
+							R.drawable.blue_round_corners));
 					tv.setPadding(5, 2, 5, 5);
 
 					LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
@@ -480,7 +484,7 @@ public class MapActivity extends GMActivity {
 	}
 
 	private void makeFBRequests(final Session session) {
-		
+
 		final Request meRequest = Request.newMeRequest(session,
 				new Request.GraphUserCallback() {
 
@@ -492,16 +496,16 @@ public class MapActivity extends GMActivity {
 							if (user != null) {
 								GeoMessenger.userId = user.getId();
 								GeoMessenger.userName = user.getName();
-								
+
 								mProgress.setVisibility(View.GONE);
 								mResult.setVisibility(View.VISIBLE);
-								
+
 							}
 						}
 						if (response.getError() != null) {
 							handleError(response.getError());
 						}
-											
+
 					}
 				});
 

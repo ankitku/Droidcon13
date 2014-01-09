@@ -1,5 +1,11 @@
 package com.nkt.geomessenger.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 public class GeoMessage extends GsonConvertibleObject {
 
 	private String id;
@@ -11,7 +17,7 @@ public class GeoMessage extends GsonConvertibleObject {
 
 	private String toUserName;
 	private String toUserId;
-	
+
 	private boolean seen;
 
 	public String getId() {
@@ -35,7 +41,8 @@ public class GeoMessage extends GsonConvertibleObject {
 	}
 
 	public String getFromUserPic() {
-		return "http://graph.facebook.com/"+ fromUserId + "/picture?type=small";
+		return "http://graph.facebook.com/" + fromUserId
+				+ "/picture?type=small";
 	}
 
 	public String getToUserName() {
@@ -43,9 +50,9 @@ public class GeoMessage extends GsonConvertibleObject {
 	}
 
 	public String getToUserPic() {
-		return "http://graph.facebook.com/"+ toUserId + "/picture?type=small";
+		return "http://graph.facebook.com/" + toUserId + "/picture?type=small";
 	}
-	
+
 	public boolean getSeenStatus() {
 		return seen;
 	}
@@ -53,10 +60,10 @@ public class GeoMessage extends GsonConvertibleObject {
 	@Override
 	public boolean equals(Object o) {
 		GeoMessage gm = (GeoMessage) o;
-		return (gm.getLoc()[0] == loc[0]
-				&& gm.getLoc()[1] == loc[1] && gm.getFromUserName() == fromUserName);
+		return (gm.getLoc()[0] == loc[0] && gm.getLoc()[1] == loc[1] && gm
+				.getFromUserName() == fromUserName);
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return 1;

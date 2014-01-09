@@ -42,7 +42,6 @@ import com.nkt.geomessenger.utils.ImageCacheManager;
 
 public class GMActivity extends SherlockFragmentActivity {
 
-	private volatile boolean isRunning;
 	protected LinearLayout fullLayout;
 	protected FrameLayout actContent;
 
@@ -68,21 +67,21 @@ public class GMActivity extends SherlockFragmentActivity {
 	private Handler handler = new Handler();
 
 	public boolean isRunning() {
-		return isRunning;
+		return GeoMessenger.isRunning;
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
 
-		isRunning = true;
+		 GeoMessenger.isRunning = true;
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
 
-		isRunning = false;
+		 GeoMessenger.isRunning = false;
 	}
 
 	public String getActivityLabel() {

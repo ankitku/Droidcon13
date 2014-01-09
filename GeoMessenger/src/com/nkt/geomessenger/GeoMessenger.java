@@ -61,4 +61,6 @@ public class GeoMessenger {
 	public static String versionName;
 
 	public static int versionCode;
+	
+	public static volatile boolean isRunning;
 }

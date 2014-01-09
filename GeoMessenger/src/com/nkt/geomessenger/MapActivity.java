@@ -44,6 +44,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter;
+import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -279,6 +280,17 @@ public class MapActivity extends GMActivity {
 			mapFragment.getUiSettings().setAllGesturesEnabled(true);
 
 			mapFragment.setInfoWindowAdapter(new CustomInfoWindowAdapter());
+			mapFragment.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
+				
+				@Override
+				public void onInfoWindowClick(Marker marker) {
+					GeoMessenger.selectedGeoMessage = markers.get(marker.getId());
+					Intent intent = new Intent(MapActivity.this,
+							MessageDetailsActivity.class);
+					startActivity(intent);
+				}
+			});
+			
 			initAnimations();
 		}
 	}

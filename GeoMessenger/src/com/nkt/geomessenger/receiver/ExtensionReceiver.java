@@ -48,7 +48,6 @@ public class ExtensionReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(final Context context, final Intent intent) {
         Log.d("", "onReceive: " + intent.getAction());
-        GeoMessenger.messagesSentToWatch.clear();
         intent.setClass(context, SampleExtensionService.class);
         context.startService(intent);
     }

@@ -83,11 +83,12 @@ public class PollGeoMessagesService extends IntentService {
 
 								publishResults(result);
 
-								if (!GeoMessenger.isRunning)
-									if (isNewMessage()) {
+								if (isNewMessage()) {
+									if (!GeoMessenger.isRunning)
 										notificationAlert();
-										addNewNotifiedMessageIds();
-									}
+
+									addNewNotifiedMessageIds();
+								}
 
 							}
 
@@ -114,8 +115,10 @@ public class PollGeoMessagesService extends IntentService {
 				new HashSet<String>());
 
 		for (GeoMessage gm : GeoMessenger.geoMessages.getResult())
-			if (!set.contains(gm.getId()))
+			if (!set.contains(gm.getId())) {
 				set.add(gm.getId());
+				GeoMessenger.msgsForSW.add(gm);
+			}
 
 		SharedPreferences.Editor editor = sharedPrefs.edit();
 		editor.putStringSet("NotifiedGeoMessageIds", set);
@@ -148,9 +151,10 @@ public class PollGeoMessagesService extends IntentService {
 
 		Intent targetIntent = new Intent(PollGeoMessagesService.this,
 				MapActivity.class);
+		targetIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+				| Intent.FLAG_ACTIVITY_SINGLE_TOP);
 		PendingIntent contentIntent = PendingIntent.getActivity(
-				PollGeoMessagesService.this, 0, targetIntent,
-				PendingIntent.FLAG_UPDATE_CURRENT);
+				PollGeoMessagesService.this, 0, targetIntent, 0);
 
 		builder.setContentIntent(contentIntent);
 		builder.setAutoCancel(true);

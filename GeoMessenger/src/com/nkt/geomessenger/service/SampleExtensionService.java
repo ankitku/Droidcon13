@@ -109,14 +109,14 @@ public class SampleExtensionService extends ExtensionService {
 			@Override
 			public void run() {
 
-				for (GeoMessage gm : GeoMessenger.geoMessages.getResult()) {
-					if (!GeoMessenger.messagesSentToWatch.contains(gm)) {
+				if (GeoMessenger.msgsForSW.size() > 0) {
+					for (GeoMessage gm : GeoMessenger.msgsForSW) {
 						addData(gm);
-						GeoMessenger.messagesSentToWatch.add(gm);
 					}
+					GeoMessenger.msgsForSW.clear();
 				}
-
-				handler.postDelayed(swSender, 1000);
+				
+				handler.postDelayed(swSender, 30000);
 			}
 		};
 	}

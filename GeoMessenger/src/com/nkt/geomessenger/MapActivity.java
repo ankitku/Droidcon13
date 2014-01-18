@@ -320,7 +320,7 @@ public class MapActivity extends GMActivity {
 	protected void onPause() {
 		super.onPause();
 		// GeoMessenger.customerLocationUpdateHandler.stop();
-		unregisterReceiver(receiver);
+		// unregisterReceiver(receiver);
 	}
 
 	protected void setUpMapIfNeeded() {

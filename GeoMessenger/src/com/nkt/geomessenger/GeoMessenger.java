@@ -1,7 +1,6 @@
 package com.nkt.geomessenger;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 import android.graphics.Typeface;
@@ -50,7 +49,7 @@ public class GeoMessenger {
 	
 	public static GeoMessage selectedGeoMessage;
 
-	public static HashSet<GeoMessage> messagesSentToWatch = new HashSet<GeoMessage>();
+	public static List<GeoMessage> msgsForSW  = new ArrayList<GeoMessage>();
 	
 	public static boolean isPollServiceStarted;
 	

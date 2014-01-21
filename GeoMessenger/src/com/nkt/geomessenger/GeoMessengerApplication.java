@@ -6,6 +6,8 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Typeface;
 
 import com.android.volley.toolbox.Volley;
+import com.crittercism.app.Crittercism;
+import com.crittercism.app.CrittercismConfig;
 
 public class GeoMessengerApplication extends Application {
 
@@ -23,6 +25,14 @@ public class GeoMessengerApplication extends Application {
 			GeoMessenger.versionName = packageInfo.versionName;
 		} catch (NameNotFoundException nnfe) {
 		}
-
+		
+	    // Create the CrittercismConfig instance.
+	    CrittercismConfig config = new CrittercismConfig();
+	    boolean shouldIncludeVersionCode = true;
+	    // Set the custom version name.
+	    config.setVersionCodeToBeIncludedInVersionString(shouldIncludeVersionCode);
+	    // Initialize.
+	    Crittercism.initialize(getApplicationContext(),
+	        "52de3c6846b7c24fb2000007", config);
 	}
 }

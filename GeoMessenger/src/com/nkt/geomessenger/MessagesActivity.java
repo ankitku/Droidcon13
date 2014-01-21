@@ -111,7 +111,7 @@ public class MessagesActivity extends GMActivity {
 					loadImage(url, picIcon);
 				}
 				
-				if (entry.getSeenStatus())
+				if (entry.isSeen())
 				{convertView.setBackgroundColor(getResources().getColor(
 						R.color.blue));
 				nameText.setTextColor(getResources().getColor(

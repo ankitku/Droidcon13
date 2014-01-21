@@ -1,6 +1,5 @@
 package com.nkt.geomessenger.model;
 
-
 public class GeoMessage extends GsonConvertibleObject {
 
 	private String id;
@@ -48,8 +47,12 @@ public class GeoMessage extends GsonConvertibleObject {
 		return "http://graph.facebook.com/" + toUserId + "/picture?type=small";
 	}
 
-	public boolean getSeenStatus() {
+	public boolean isSeen() {
 		return seen;
+	}
+
+	public void setSeen(boolean b) {
+		seen = b;
 	}
 
 	@Override

@@ -14,14 +14,18 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.BounceInterpolator;
+import android.view.animation.Interpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -45,7 +49,9 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
+import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -81,24 +87,9 @@ public class MapActivity extends GMActivity {
 				if (isCentered) {
 					if (resultCode == RESULT_OK) {
 						mapFragment.clear();
-						if (GeoMessenger.geoMessages != null) {
-							for (final GeoMessage gm : GeoMessenger.geoMessages
-									.getResult()) {
 
-								LatLng p = new LatLng(gm.getLoc()[0],
-										gm.getLoc()[1]);
-
-								final Marker m = mapFragment
-										.addMarker(new MarkerOptions()
-												.position(p)
-												.title(gm.getFromUserName())
-												.snippet(
-														Utils.getHumanReadableTime(gm
-																.getTimestamp())));
-
-								markers.put(m.getId(), gm);
-							}
-						}
+						if (GeoMessenger.geoMessages != null)
+							drawMarkers();
 					}
 				} else
 					centerMap();
@@ -280,17 +271,20 @@ public class MapActivity extends GMActivity {
 			mapFragment.getUiSettings().setAllGesturesEnabled(true);
 
 			mapFragment.setInfoWindowAdapter(new CustomInfoWindowAdapter());
-			mapFragment.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
-				
-				@Override
-				public void onInfoWindowClick(Marker marker) {
-					GeoMessenger.selectedGeoMessage = markers.get(marker.getId());
-					Intent intent = new Intent(MapActivity.this,
-							MessageDetailsActivity.class);
-					startActivity(intent);
-				}
-			});
-			
+			mapFragment
+					.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
+
+						@Override
+						public void onInfoWindowClick(Marker marker) {
+							GeoMessenger.selectedGeoMessage = markers
+									.get(marker.getId());
+							GeoMessenger.selectedGeoMessage.setSeen(true);
+							Intent intent = new Intent(MapActivity.this,
+									MessageDetailsActivity.class);
+							startActivity(intent);
+						}
+					});
+
 			initAnimations();
 		}
 	}
@@ -300,6 +294,11 @@ public class MapActivity extends GMActivity {
 		super.onResume();
 		registerReceiver(receiver, new IntentFilter(
 				PollGeoMessagesService.NOTIFICATION));
+
+		mapFragment.clear();
+		
+		if (GeoMessenger.geoMessages != null)
+			drawMarkers();
 
 		handler.post(new Runnable() {
 			@Override
@@ -320,7 +319,7 @@ public class MapActivity extends GMActivity {
 	protected void onPause() {
 		super.onPause();
 		// GeoMessenger.customerLocationUpdateHandler.stop();
-		// unregisterReceiver(receiver);
+		unregisterReceiver(receiver);
 	}
 
 	protected void setUpMapIfNeeded() {
@@ -337,6 +336,59 @@ public class MapActivity extends GMActivity {
 		Intent intent = new Intent(this, PollGeoMessagesService.class);
 		startService(intent);
 		GeoMessenger.isPollServiceStarted = true;
+	}
+
+	private void drawMarkers() {
+		for (final GeoMessage gm : GeoMessenger.geoMessages.getResult()) {
+
+			LatLng p = new LatLng(gm.getLoc()[0], gm.getLoc()[1]);
+
+			final Marker m = mapFragment.addMarker(new MarkerOptions()
+					.position(p)
+					.title(gm.getFromUserName())
+					.icon(BitmapDescriptorFactory.defaultMarker(gm
+							.isSeen() ? BitmapDescriptorFactory.HUE_BLUE
+							: BitmapDescriptorFactory.HUE_RED))
+					.snippet(Utils.getHumanReadableTime(gm.getTimestamp())));
+			
+			if(!gm.isSeen())
+				animateMarker(m);
+			
+			markers.put(m.getId(), gm);
+		}
+	}
+	
+	private void animateMarker(final Marker marker)
+	{
+		  //Make the marker bounce
+		        final Handler handler = new Handler();
+		        
+		        final long startTime = SystemClock.uptimeMillis();
+		        final long duration = 2000;
+		        
+		        Projection proj = mapFragment.getProjection();
+		        final LatLng markerLatLng = marker.getPosition();
+		        Point startPoint = proj.toScreenLocation(markerLatLng);
+		        startPoint.offset(0, -100);
+		        final LatLng startLatLng = proj.fromScreenLocation(startPoint);
+
+		        final Interpolator interpolator = new BounceInterpolator();
+
+		        handler.post(new Runnable() {
+		            @Override
+		            public void run() {
+		                long elapsed = SystemClock.uptimeMillis() - startTime;
+		                float t = interpolator.getInterpolation((float) elapsed / duration);
+		                double lng = t * markerLatLng.longitude + (1 - t) * startLatLng.longitude;
+		                double lat = t * markerLatLng.latitude + (1 - t) * startLatLng.latitude;
+		                marker.setPosition(new LatLng(lat, lng));
+
+		                if (t < 1.0) {
+		                    // Post again 16ms later.
+		                    handler.postDelayed(this, 16);
+		                }
+		            }
+		        });
 	}
 
 	public void showFields() {

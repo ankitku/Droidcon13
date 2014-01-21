@@ -145,8 +145,7 @@ public class PollGeoMessagesService extends IntentService {
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(
 				PollGeoMessagesService.this)
 				.setSmallIcon(R.drawable.ic_launcher)
-				.setContentTitle("New GeoMessages")
-				.setContentText("Click to find out");
+				.setContentTitle("New GeoMessages");
 		int NOTIFICATION_ID = 12345;
 
 		Intent targetIntent = new Intent(PollGeoMessagesService.this,

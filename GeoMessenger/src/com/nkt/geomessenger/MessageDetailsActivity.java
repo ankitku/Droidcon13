@@ -8,6 +8,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 
 import com.android.volley.Request.Method;
@@ -56,6 +57,30 @@ public class MessageDetailsActivity extends GMActivity {
 					@Override
 					public void onResponse(JSONObject response) {
 						String jsonrep = response.toString();
+					}
+				}, new Response.ErrorListener() {
+
+					@Override
+					public void onErrorResponse(VolleyError error) {
+					}
+				});
+
+		GeoMessenger.queue.add(jsonSentMessagesRequest);
+	}
+	
+	public void deleteGeoMessage(View v) {
+		List<NameValuePair> list = new ArrayList<NameValuePair>();
+		list.add(new BasicNameValuePair("id", GeoMessenger.selectedGeoMessage
+				.getId()));
+
+		JsonObjectRequest jsonSentMessagesRequest = new JsonObjectRequest(
+				Method.GET, Utils.getFilledUrl(UrlConstants.getGMDelUrl(),
+						list), null, new Response.Listener<JSONObject>() {
+
+					@Override
+					public void onResponse(JSONObject response) {
+						String jsonrep = response.toString();
+						finish();
 					}
 				}, new Response.ErrorListener() {
 

@@ -28,6 +28,7 @@ import android.view.animation.BounceInterpolator;
 import android.view.animation.Interpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -71,6 +72,7 @@ public class MapActivity extends GMActivity {
 	private EditText messageText;
 	private Button saveButton;
 	private View mResult, mProgress;
+	private CheckBox selfCheckBox;
 
 	private boolean fieldsVisible, isCentered;
 	private Hashtable<String, GeoMessage> markers = new Hashtable<String, GeoMessage>();
@@ -216,6 +218,7 @@ public class MapActivity extends GMActivity {
 		bottomViewLayout = (LinearLayout) findViewById(R.id.bottom_view);
 		friendsPickerLayout = (FlowLayout) findViewById(R.id.friends_picker);
 		sendOptionsLayout = (LinearLayout) findViewById(R.id.send_options);
+		selfCheckBox = (CheckBox) findViewById(R.id.check_self);
 
 		messageText = (EditText) findViewById(R.id.msg_text);
 		saveButton = (Button) findViewById(R.id.btn_save);
@@ -320,6 +323,7 @@ public class MapActivity extends GMActivity {
 		super.onPause();
 		// GeoMessenger.customerLocationUpdateHandler.stop();
 		unregisterReceiver(receiver);
+		mapFragment.clear();
 	}
 
 	protected void setUpMapIfNeeded() {
@@ -477,6 +481,20 @@ public class MapActivity extends GMActivity {
 				gm.put("toUserName", g.getName());
 
 				geoMessages.put(gm);
+			}
+			
+			if(selfCheckBox.isChecked())
+			{
+				JSONObject gm = new JSONObject();
+				gm.put("loc", new JSONArray(Arrays.toString(loc)));
+				gm.put("message", msg);
+				gm.put("fromUserId",GeoMessenger.userId);
+				gm.put("fromUserName", "MySelf");
+				gm.put("toUserId", GeoMessenger.userId);
+				gm.put("toUserName", "MySelf");				
+				
+				geoMessages.put(gm);
+
 			}
 
 			jsonObjectRequest.put("geo_messages", geoMessages);

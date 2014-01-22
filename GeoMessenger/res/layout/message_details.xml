@@ -43,6 +43,7 @@
         android:layout_margin="30dp"
         android:background="@drawable/delete_button_round_corners"
         android:text="@string/action_delete"
+        android:onClick="deleteGeoMessage"
         android:textColor="@color/white" />
 
 </LinearLayout>

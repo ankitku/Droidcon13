@@ -21,6 +21,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import com.android.volley.Request.Method;
 import com.android.volley.Response;
@@ -48,63 +49,63 @@ public class PollGeoMessagesService extends IntentService {
 	public PollGeoMessagesService() {
 		super("PollGeoMessagesService");
 	}
+	
+	private Runnable geoMessagesFetcher =  new Runnable() {
+
+		@Override
+		public void run() {
+			result = Activity.RESULT_CANCELED;
+
+			List<NameValuePair> list = new ArrayList<NameValuePair>();
+			list.add(new BasicNameValuePair("loc[]", Double
+					.toString(GeoMessenger.customerLocation.getLatitude())));
+			list.add(new BasicNameValuePair("loc[]", Double
+					.toString(GeoMessenger.customerLocation.getLongitude())));
+			list.add(new BasicNameValuePair("user_id", GeoMessenger.userId));
+			list.add(new BasicNameValuePair("radius_in_metres", "1000"));
+
+			JsonObjectRequest jsonGeoMessagesRequest = new JsonObjectRequest(
+					Method.GET, Utils.getFilledUrl(
+							UrlConstants.getNearGeoMsgsUrl(), list), null,
+					new Response.Listener<JSONObject>() {
+
+						@Override
+						public void onResponse(JSONObject response) {
+							result = Activity.RESULT_OK;
+							String jsonrep = response.toString();
+							Log.d("PollGMService", jsonrep);
+
+							GeoMessenger.geoMessages = GsonConvertibleObject
+									.getObjectFromJson(jsonrep,
+											QueryGeoMessagesResult.class);
+							publishResults(result);
+
+							if (isNewMessage()) {
+								if (!GeoMessenger.isRunning)
+									notificationAlert();
+
+								addNewNotifiedMessageIds();
+							}
+
+						}
+
+					}, new Response.ErrorListener() {
+
+						@Override
+						public void onErrorResponse(VolleyError error) {
+							publishResults(result);
+						}
+					});
+
+			GeoMessenger.queue.add(jsonGeoMessagesRequest);
+			handler.postDelayed(this, 30 * Constants.MILLIS_IN_A_SECOND);
+		}
+	};
 
 	// will be called asynchronously by Android
 	@Override
 	protected void onHandleIntent(Intent intent) {
-
-		handler.post(new Runnable() {
-
-			@Override
-			public void run() {
-				result = Activity.RESULT_CANCELED;
-
-				List<NameValuePair> list = new ArrayList<NameValuePair>();
-				list.add(new BasicNameValuePair("loc[]", Double
-						.toString(GeoMessenger.customerLocation.getLatitude())));
-				list.add(new BasicNameValuePair("loc[]", Double
-						.toString(GeoMessenger.customerLocation.getLongitude())));
-				list.add(new BasicNameValuePair("user_id", GeoMessenger.userId));
-				list.add(new BasicNameValuePair("radius_in_metres", "1000"));
-
-				JsonObjectRequest jsonGeoMessagesRequest = new JsonObjectRequest(
-						Method.GET, Utils.getFilledUrl(
-								UrlConstants.getNearGeoMsgsUrl(), list), null,
-						new Response.Listener<JSONObject>() {
-
-							@Override
-							public void onResponse(JSONObject response) {
-								result = Activity.RESULT_OK;
-								String jsonrep = response.toString();
-
-								GeoMessenger.geoMessages = GsonConvertibleObject
-										.getObjectFromJson(jsonrep,
-												QueryGeoMessagesResult.class);
-
-								publishResults(result);
-
-								if (isNewMessage()) {
-									if (!GeoMessenger.isRunning)
-										notificationAlert();
-
-									addNewNotifiedMessageIds();
-								}
-
-							}
-
-						}, new Response.ErrorListener() {
-
-							@Override
-							public void onErrorResponse(VolleyError error) {
-								publishResults(result);
-							}
-						});
-
-				GeoMessenger.queue.add(jsonGeoMessagesRequest);
-				handler.postDelayed(this, 30 * Constants.MILLIS_IN_A_SECOND);
-			}
-		});
-
+		handler.post(geoMessagesFetcher);
 	}
 
 	private void addNewNotifiedMessageIds() {

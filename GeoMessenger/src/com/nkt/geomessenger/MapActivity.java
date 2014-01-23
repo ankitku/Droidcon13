@@ -299,7 +299,7 @@ public class MapActivity extends GMActivity {
 				PollGeoMessagesService.NOTIFICATION));
 
 		mapFragment.clear();
-		
+
 		if (GeoMessenger.geoMessages != null)
 			drawMarkers();
 
@@ -308,12 +308,9 @@ public class MapActivity extends GMActivity {
 			public void run() {
 				if (!isCentered) {
 					centerMap();
-					handler.postDelayed(this, 2 * Constants.MILLIS_IN_A_SECOND);
-				} else {
+					handler.postDelayed(this, Constants.MILLIS_IN_A_SECOND / 2);
+				} else
 					handler.removeCallbacks(this);
-					if (!GeoMessenger.isPollServiceStarted)
-						startService();
-				}
 			}
 		});
 	}
@@ -338,8 +335,14 @@ public class MapActivity extends GMActivity {
 
 	private void startService() {
 		Intent intent = new Intent(this, PollGeoMessagesService.class);
-		startService(intent);
+		Log.d("PollGMService", "" + startService(intent));
 		GeoMessenger.isPollServiceStarted = true;
+	}
+
+	private void stopService() {
+		Intent intent = new Intent(this, PollGeoMessagesService.class);
+		Log.d("PollGMService", "" + stopService(intent));
+		GeoMessenger.isPollServiceStarted = false;
 	}
 
 	private void drawMarkers() {
@@ -347,52 +350,57 @@ public class MapActivity extends GMActivity {
 
 			LatLng p = new LatLng(gm.getLoc()[0], gm.getLoc()[1]);
 
-			final Marker m = mapFragment.addMarker(new MarkerOptions()
-					.position(p)
-					.title(gm.getFromUserName())
-					.icon(BitmapDescriptorFactory.defaultMarker(gm
-							.isSeen() ? BitmapDescriptorFactory.HUE_BLUE
-							: BitmapDescriptorFactory.HUE_RED))
-					.snippet(Utils.getHumanReadableTime(gm.getTimestamp())));
-			
-			if(!gm.isSeen())
+			final Marker m = mapFragment
+					.addMarker(new MarkerOptions()
+							.position(p)
+							.title(gm.getFromUserName())
+							.icon(BitmapDescriptorFactory.defaultMarker(gm
+									.isSeen() ? BitmapDescriptorFactory.HUE_BLUE
+									: BitmapDescriptorFactory.HUE_RED))
+							.snippet(
+									Utils.getHumanReadableTime(gm
+											.getTimestamp())));
+
+			if (!gm.isSeen())
 				animateMarker(m);
-			
+
 			markers.put(m.getId(), gm);
 		}
 	}
-	
-	private void animateMarker(final Marker marker)
-	{
-		  //Make the marker bounce
-		        final Handler handler = new Handler();
-		        
-		        final long startTime = SystemClock.uptimeMillis();
-		        final long duration = 2000;
-		        
-		        Projection proj = mapFragment.getProjection();
-		        final LatLng markerLatLng = marker.getPosition();
-		        Point startPoint = proj.toScreenLocation(markerLatLng);
-		        startPoint.offset(0, -100);
-		        final LatLng startLatLng = proj.fromScreenLocation(startPoint);
 
-		        final Interpolator interpolator = new BounceInterpolator();
+	private void animateMarker(final Marker marker) {
+		// Make the marker bounce
+		final Handler handler = new Handler();
 
-		        handler.post(new Runnable() {
-		            @Override
-		            public void run() {
-		                long elapsed = SystemClock.uptimeMillis() - startTime;
-		                float t = interpolator.getInterpolation((float) elapsed / duration);
-		                double lng = t * markerLatLng.longitude + (1 - t) * startLatLng.longitude;
-		                double lat = t * markerLatLng.latitude + (1 - t) * startLatLng.latitude;
-		                marker.setPosition(new LatLng(lat, lng));
+		final long startTime = SystemClock.uptimeMillis();
+		final long duration = 2000;
 
-		                if (t < 1.0) {
-		                    // Post again 16ms later.
-		                    handler.postDelayed(this, 16);
-		                }
-		            }
-		        });
+		Projection proj = mapFragment.getProjection();
+		final LatLng markerLatLng = marker.getPosition();
+		Point startPoint = proj.toScreenLocation(markerLatLng);
+		startPoint.offset(0, -100);
+		final LatLng startLatLng = proj.fromScreenLocation(startPoint);
+
+		final Interpolator interpolator = new BounceInterpolator();
+
+		handler.post(new Runnable() {
+			@Override
+			public void run() {
+				long elapsed = SystemClock.uptimeMillis() - startTime;
+				float t = interpolator.getInterpolation((float) elapsed
+						/ duration);
+				double lng = t * markerLatLng.longitude + (1 - t)
+						* startLatLng.longitude;
+				double lat = t * markerLatLng.latitude + (1 - t)
+						* startLatLng.latitude;
+				marker.setPosition(new LatLng(lat, lng));
+
+				if (t < 1.0) {
+					// Post again 16ms later.
+					handler.postDelayed(this, 16);
+				}
+			}
+		});
 	}
 
 	public void showFields() {
@@ -461,6 +469,7 @@ public class MapActivity extends GMActivity {
 	}
 
 	private void sendMessage() {
+		mProgress.setVisibility(View.VISIBLE);
 
 		String msg = messageText.getText().toString();
 
@@ -482,17 +491,16 @@ public class MapActivity extends GMActivity {
 
 				geoMessages.put(gm);
 			}
-			
-			if(selfCheckBox.isChecked())
-			{
+
+			if (selfCheckBox.isChecked()) {
 				JSONObject gm = new JSONObject();
 				gm.put("loc", new JSONArray(Arrays.toString(loc)));
 				gm.put("message", msg);
-				gm.put("fromUserId",GeoMessenger.userId);
+				gm.put("fromUserId", GeoMessenger.userId);
 				gm.put("fromUserName", "MySelf");
 				gm.put("toUserId", GeoMessenger.userId);
-				gm.put("toUserName", "MySelf");				
-				
+				gm.put("toUserName", "MySelf");
+
 				geoMessages.put(gm);
 
 			}
@@ -512,6 +520,8 @@ public class MapActivity extends GMActivity {
 						hideFields();
 						showAlertDialog();
 						messageText.setText("");
+						mProgress.setVisibility(View.GONE);
+
 						saveButton.setOnClickListener(new OnClickListener() {
 
 							@Override
@@ -525,7 +535,7 @@ public class MapActivity extends GMActivity {
 
 					@Override
 					public void onErrorResponse(VolleyError error) {
-
+						mProgress.setVisibility(View.GONE);
 					}
 
 				});
@@ -582,6 +592,7 @@ public class MapActivity extends GMActivity {
 								mProgress.setVisibility(View.GONE);
 								mResult.setVisibility(View.VISIBLE);
 
+								startService();
 							}
 						}
 						if (response.getError() != null) {

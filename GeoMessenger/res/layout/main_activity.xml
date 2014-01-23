@@ -4,14 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <ProgressBar
-        android:id="@+id/pg_loading"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:indeterminate="true"
-        android:visibility="gone" />
-
     <RelativeLayout
         android:id="@+id/ly_result"
         android:layout_width="fill_parent"
@@ -104,5 +96,13 @@
                 android:text="@string/btn_save" />
         </LinearLayout>
     </RelativeLayout>
+
+    <ProgressBar
+        android:id="@+id/pg_loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminate="true"
+        android:visibility="gone" />
 
 </merge>

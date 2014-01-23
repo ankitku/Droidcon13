@@ -80,6 +80,9 @@ public class MessageDetailsActivity extends GMActivity {
 					@Override
 					public void onResponse(JSONObject response) {
 						String jsonrep = response.toString();
+						
+						List<GeoMessage> msgs = GeoMessenger.geoMessages.getResult();
+						msgs.remove(msgs.indexOf(GeoMessenger.selectedGeoMessage));
 						finish();
 					}
 				}, new Response.ErrorListener() {

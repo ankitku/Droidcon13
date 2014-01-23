@@ -54,12 +54,15 @@ public class GeoMessage extends GsonConvertibleObject {
 	public void setSeen(boolean b) {
 		seen = b;
 	}
+	
+	public void setId(String id) {
+		this.id = id;
+	}
 
 	@Override
 	public boolean equals(Object o) {
 		GeoMessage gm = (GeoMessage) o;
-		return (gm.getLoc()[0] == loc[0] && gm.getLoc()[1] == loc[1] && gm
-				.getFromUserName() == fromUserName);
+		return (gm.getId() == id);
 	}
 
 	@Override

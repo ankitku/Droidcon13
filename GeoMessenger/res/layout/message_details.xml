@@ -20,6 +20,12 @@
         android:textColor="@color/grey"
         android:textSize="22sp" />
 
+    <ImageView
+        android:id="@+id/pic"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp" />
+
     <TextView
         android:id="@+id/messageText"
         android:layout_width="fill_parent"
@@ -42,8 +48,8 @@
         android:layout_gravity="center"
         android:layout_margin="30dp"
         android:background="@drawable/delete_button_round_corners"
-        android:text="@string/action_delete"
         android:onClick="deleteGeoMessage"
+        android:text="@string/action_delete"
         android:textColor="@color/white" />
 
 </LinearLayout>

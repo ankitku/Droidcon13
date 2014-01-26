@@ -42,7 +42,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -582,6 +581,9 @@ public class MapActivity extends GMActivity {
 				gm.put("toUserId", g.getId());
 				gm.put("toUserName", g.getName());
 
+				if (!Utils.isEmpty(selectedImageName))
+					gm.put("picName", selectedImageName);
+
 				geoMessages.put(gm);
 			}
 
@@ -594,6 +596,9 @@ public class MapActivity extends GMActivity {
 				gm.put("toUserId", GeoMessenger.userId);
 				gm.put("toUserName", "MySelf");
 
+				if (!Utils.isEmpty(selectedImageName))
+					gm.put("picName", selectedImageName);
+				
 				geoMessages.put(gm);
 
 			}
@@ -645,7 +650,7 @@ public class MapActivity extends GMActivity {
 		sourceSelection.setSingleChoiceItems(items, -1,
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int item) {
-						if (item == 0)
+						if (item ==1)
 							albumPic();
 						else
 							camPic();
@@ -715,21 +720,6 @@ public class MapActivity extends GMActivity {
 
 				uploadPic.setImageBitmap(selectedBitmap);
 				uploadImageLayout.setVisibility(View.VISIBLE);
-
-				//
-				// ResponseHeaderOverrides override = new
-				// ResponseHeaderOverrides();
-				// override.setContentType("image/jpeg");
-				//
-				// GeneratePresignedUrlRequest urlRequest = new
-				// GeneratePresignedUrlRequest(
-				// GeoMessenger.getPictureBucket(), selectedImageName);
-				// urlRequest.setExpiration(new Date(
-				// System.currentTimeMillis() + 3600000));
-				// urlRequest.setResponseHeaders(override);
-				//
-				// URL url = s3Client.generatePresignedUrl(urlRequest);
-
 			}
 		}
 

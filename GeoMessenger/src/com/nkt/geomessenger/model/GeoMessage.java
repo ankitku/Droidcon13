@@ -8,6 +8,8 @@ public class GeoMessage extends GsonConvertibleObject {
 
 	private String fromUserName;
 	private String fromUserId;
+	
+	private String picName;
 
 	private String toUserName;
 	private String toUserId;
@@ -26,6 +28,10 @@ public class GeoMessage extends GsonConvertibleObject {
 		return loc;
 	}
 
+	public String getPicName() {
+		return picName;
+	}
+	
 	public String getMessage() {
 		return message;
 	}

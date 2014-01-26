@@ -27,6 +27,9 @@
 -libraryjars libs/android-support-v4.jar
 -libraryjars libs/crittercism_v4_4_0_sdkonly.jar
 -libraryjars libs/gson-2.2.4.jar
+-libraryjars libs/aws-android-sdk-1.7.1.1-core.jar
+-libraryjars libs/aws-android-sdk-1.7.1.1-s3.jar
+
 -keepdirectories ../libraries/
 
 -keep class com.facebook.** {*;}
@@ -58,8 +61,13 @@
     public void set*(...);
 }
 
--keep public class com.crittercism.**
+-keep public class com.amazonaws.**
+-keepclassmembers public class com.amazonaws.*
+{
+    *;
+}
 
+-keep public class com.crittercism.**
 -keepclassmembers public class com.crittercism.*
 {
     *;

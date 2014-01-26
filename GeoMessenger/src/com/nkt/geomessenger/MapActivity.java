@@ -1,12 +1,17 @@
 package com.nkt.geomessenger;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.List;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
@@ -60,6 +65,8 @@ import com.nkt.geomessenger.constants.Constants;
 import com.nkt.geomessenger.constants.UrlConstants;
 import com.nkt.geomessenger.map.CustomerLocationUpdater;
 import com.nkt.geomessenger.model.GeoMessage;
+import com.nkt.geomessenger.model.GsonConvertibleObject;
+import com.nkt.geomessenger.model.QueryGeoMessagesResult;
 import com.nkt.geomessenger.service.PollGeoMessagesService;
 import com.nkt.geomessenger.utils.Utils;
 import com.nkt.views.FlowLayout;
@@ -309,8 +316,11 @@ public class MapActivity extends GMActivity {
 				if (!isCentered) {
 					centerMap();
 					handler.postDelayed(this, Constants.MILLIS_IN_A_SECOND / 2);
-				} else
+				} else {
 					handler.removeCallbacks(this);
+					if (!GeoMessenger.isPollServiceStarted)
+						startService();
+				}
 			}
 		});
 	}
@@ -521,7 +531,8 @@ public class MapActivity extends GMActivity {
 						showAlertDialog();
 						messageText.setText("");
 						mProgress.setVisibility(View.GONE);
-
+						fetchUpdatedMessages();
+						
 						saveButton.setOnClickListener(new OnClickListener() {
 
 							@Override
@@ -592,7 +603,7 @@ public class MapActivity extends GMActivity {
 								mProgress.setVisibility(View.GONE);
 								mResult.setVisibility(View.VISIBLE);
 
-								startService();
+								fetchUpdatedMessages();
 							}
 						}
 						if (response.getError() != null) {
@@ -623,6 +634,35 @@ public class MapActivity extends GMActivity {
 			mapFragment.moveCamera(CameraUpdateFactory.newLatLngZoom(p, 16.0f));
 			isCentered = true;
 		}
+	}
+
+	private void fetchUpdatedMessages() {
+		List<NameValuePair> list = new ArrayList<NameValuePair>();
+		list.add(new BasicNameValuePair("loc[]", Double
+				.toString(GeoMessenger.customerLocation.getLatitude())));
+		list.add(new BasicNameValuePair("loc[]", Double
+				.toString(GeoMessenger.customerLocation.getLongitude())));
+		list.add(new BasicNameValuePair("user_id", GeoMessenger.userId));
+		list.add(new BasicNameValuePair("radius_in_metres", "1000"));
+
+		JsonObjectRequest jsonGeoMessagesRequest = new JsonObjectRequest(
+				Method.GET, Utils.getFilledUrl(
+						UrlConstants.getNearGeoMsgsUrl(), list), null,
+				new Response.Listener<JSONObject>() {
+
+					@Override
+					public void onResponse(JSONObject response) {
+						String jsonrep = response.toString();
+						Log.d("MapActivity", jsonrep);
+
+						GeoMessenger.geoMessages = GsonConvertibleObject
+								.getObjectFromJson(jsonrep,
+										QueryGeoMessagesResult.class);
+
+						drawMarkers();
+					}
+				}, null);
+		GeoMessenger.queue.add(jsonGeoMessagesRequest);
 	}
 
 	@Override

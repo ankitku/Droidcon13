@@ -33,7 +33,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:visibility="gone" >
+                android:visibility="visible" >
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -67,23 +67,58 @@
                     android:text="Include Self ?"
                     android:textSize="16dip" />
 
-                <TextView
-                    android:id="@+id/t2"
-                    android:layout_width="match_parent"
+                <ProgressBar
+                    android:id="@+id/pg_uploading"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="top"
-                    android:layout_marginLeft="5dp"
-                    android:layout_weight="0"
-                    android:text="Your message"
-                    android:textIsSelectable="false"
-                    android:textSize="20sp" />
+                    android:layout_gravity="center"
+                    android:indeterminate="true"
+                    android:visibility="gone" />
 
-                <EditText
-                    android:id="@+id/msg_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:imeOptions="actionDone"
-                    android:inputType="text" />
+                <LinearLayout
+                    android:id="@+id/upload_image_layout"
+                    android:layout_width="fill_parent"
+                    android:layout_height="40dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:visibility="gone" >
+
+                    <ImageView
+                        android:id="@+id/upload_pic"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:layout_gravity="center" />
+
+                    <Button
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:background="@drawable/btn_close_normal"
+                        android:onClick="removePic" >
+                    </Button>
+                </LinearLayout>
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="50dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:visibility="visible" >
+
+                    <EditText
+                        android:id="@+id/msg_text"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Your message"
+                        android:imeOptions="actionDone"
+                        android:inputType="text" />
+
+                    <Button
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_alignParentRight="true"
+                        android:background="@drawable/ic_menu_camera"
+                        android:onClick="picSource" />
+                </RelativeLayout>
             </LinearLayout>
 
             <Button

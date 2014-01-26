@@ -13,4 +13,8 @@ public class Constants {
 	public static final int DEFAULT_SEARCH_RADIUS = 1*METERS_IN_KM;
 
 	public static final long MAP_REFRESH_INTERVAL = 11 * 1000;
+	
+	public static final String A_A_K = "AKIAIANZKJCTV452EHYA";
+
+	public static final String A_S_K = "AwTEASWEUQGB3qknKt2UB0h/9FoEfsCP9a29fifx";
 }

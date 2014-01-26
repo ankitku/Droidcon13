@@ -1,5 +1,7 @@
 package com.nkt.geomessenger;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -11,7 +13,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
@@ -19,7 +20,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -38,10 +42,15 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.PutObjectResult;
 import com.android.volley.Request.Method;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -73,18 +82,70 @@ import com.nkt.views.FlowLayout;
 
 public class MapActivity extends GMActivity {
 
-	private LinearLayout bottomViewLayout, sendOptionsLayout;
+	class UploadPicAsyncTask extends AsyncTask<String, Integer, Double> {
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			mProgressUpload.setVisibility(View.VISIBLE);
+		}
+
+		@Override
+		protected Double doInBackground(String... params) {
+
+			AmazonS3Client s3Client = new AmazonS3Client(
+					new BasicAWSCredentials(Constants.A_A_K, Constants.A_S_K));
+
+			PutObjectRequest por = null;
+			try {
+				File compressedImageFile = Utils.convertBitmapToFile(
+						MapActivity.this, selectedBitmap, selectedImageName);
+
+				por = new PutObjectRequest(GeoMessenger.getPictureBucket(),
+						selectedImageName, compressedImageFile);
+			} catch (IOException ioe) {
+
+			}
+
+			PutObjectResult pors = s3Client.putObject(por);
+			if (pors.getContentMd5() != null)
+				return 1d;
+			else
+				return 0d;
+		}
+
+		@Override
+		protected void onPostExecute(Double result) {
+			super.onPostExecute(result);
+			if (result == 1d) {
+				mProgressUpload.setVisibility(View.GONE);
+				sendMessage();
+			} else {
+				// error in image upload
+			}
+		}
+
+	}
+
+	private LinearLayout bottomViewLayout, sendOptionsLayout,
+			uploadImageLayout;
 	private FlowLayout friendsPickerLayout;
 	private Handler handler;
 	private EditText messageText;
 	private Button saveButton;
-	private View mResult, mProgress;
+	private View mResult, mProgress, mProgressUpload;
 	private CheckBox selfCheckBox;
+	private String selectedImageName;
+	private Bitmap selectedBitmap;
+	private Button albumPicUploadButton, camPicUploadButton;
+	private ImageView uploadPic;
 
 	private boolean fieldsVisible, isCentered;
 	private Hashtable<String, GeoMessage> markers = new Hashtable<String, GeoMessage>();
 
 	private static final int GET_SELECTED_FRIENDS = 1;
+	private static final int PHOTO_SELECTED = 2;
+	private static final int CAM_PIC = 3;
 
 	private BroadcastReceiver receiver = new BroadcastReceiver() {
 
@@ -217,6 +278,7 @@ public class MapActivity extends GMActivity {
 	private void createUIElements() {
 
 		mProgress = findViewById(R.id.pg_loading);
+		mProgressUpload = findViewById(R.id.pg_uploading);
 		mResult = findViewById(R.id.ly_result);
 
 		mProgress.setVisibility(View.VISIBLE);
@@ -229,6 +291,10 @@ public class MapActivity extends GMActivity {
 
 		messageText = (EditText) findViewById(R.id.msg_text);
 		saveButton = (Button) findViewById(R.id.btn_save);
+
+		uploadImageLayout = (LinearLayout) findViewById(R.id.upload_image_layout);
+
+		uploadPic = (ImageView) findViewById(R.id.upload_pic);
 
 		saveButton.setOnClickListener(new OnClickListener() {
 
@@ -421,7 +487,10 @@ public class MapActivity extends GMActivity {
 
 			@Override
 			public void onClick(View v) {
-				sendMessage();
+				if (selectedImageName == null)
+					sendMessage();
+				else
+					(new UploadPicAsyncTask()).execute();
 			}
 		});
 
@@ -434,6 +503,8 @@ public class MapActivity extends GMActivity {
 					@Override
 					public void run() {
 						sendOptionsLayout.setVisibility(View.VISIBLE);
+						uploadImageLayout.setVisibility(View.GONE);
+						mProgressUpload.setVisibility(View.GONE);
 						bottomViewLayout.startAnimation(animateBottomViewIn);
 					}
 				});
@@ -448,6 +519,7 @@ public class MapActivity extends GMActivity {
 		GeoMessenger.getSelectedUsers().clear();
 		friendsPickerLayout.removeAllViews();
 		messageText.setText("");
+		removePic(messageText);
 
 		handler.postDelayed(new Runnable() {
 
@@ -476,6 +548,17 @@ public class MapActivity extends GMActivity {
 			intent.setClass(MapActivity.this, PickerActivity.class);
 			startActivityForResult(intent, GET_SELECTED_FRIENDS);
 		}
+	}
+
+	public void removePic(View v) {
+		uploadImageLayout.setVisibility(View.GONE);
+		uploadPic.setImageBitmap(null);
+		selectedImageName = null;
+		selectedBitmap = null;
+	}
+
+	public void sendPic() {
+		(new UploadPicAsyncTask()).execute();
 	}
 
 	private void sendMessage() {
@@ -532,7 +615,7 @@ public class MapActivity extends GMActivity {
 						messageText.setText("");
 						mProgress.setVisibility(View.GONE);
 						fetchUpdatedMessages();
-						
+
 						saveButton.setOnClickListener(new OnClickListener() {
 
 							@Override
@@ -552,6 +635,39 @@ public class MapActivity extends GMActivity {
 				});
 
 		GeoMessenger.queue.add(jsonGeoMessagesRequest);
+	}
+
+	public void picSource(View v) {
+		AlertDialog.Builder sourceSelection = new AlertDialog.Builder(this);
+
+		final CharSequence[] items = { "Take Photo", "Attach Photo" };
+
+		sourceSelection.setSingleChoiceItems(items, -1,
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int item) {
+						if (item == 0)
+							albumPic();
+						else
+							camPic();
+						dialog.dismiss();
+					}
+				});
+
+		AlertDialog alert = sourceSelection.create();
+		alert.show();
+
+	}
+
+	private void camPic() {
+		final Intent cameraIntent = new Intent(
+				android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+		startActivityForResult(cameraIntent, CAM_PIC);
+	}
+
+	private void albumPic() {
+		Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+		intent.setType("image/*");
+		startActivityForResult(intent, PHOTO_SELECTED);
 	}
 
 	@Override
@@ -582,6 +698,51 @@ public class MapActivity extends GMActivity {
 								InputMethodManager.HIDE_IMPLICIT_ONLY);
 					}
 				}
+			}
+		}
+
+		if (requestCode == PHOTO_SELECTED) {
+			if (resultCode == RESULT_OK) {
+				Uri selectedImage = data.getData();
+
+				String selectedImagePath = Utils.getRealPathFromURI(
+						MapActivity.this, selectedImage);
+
+				selectedImageName = GeoMessenger.userId + "_"
+						+ System.currentTimeMillis();
+				selectedBitmap = Utils
+						.decodeSampledBitmapFromFile(selectedImagePath);
+
+				uploadPic.setImageBitmap(selectedBitmap);
+				uploadImageLayout.setVisibility(View.VISIBLE);
+
+				//
+				// ResponseHeaderOverrides override = new
+				// ResponseHeaderOverrides();
+				// override.setContentType("image/jpeg");
+				//
+				// GeneratePresignedUrlRequest urlRequest = new
+				// GeneratePresignedUrlRequest(
+				// GeoMessenger.getPictureBucket(), selectedImageName);
+				// urlRequest.setExpiration(new Date(
+				// System.currentTimeMillis() + 3600000));
+				// urlRequest.setResponseHeaders(override);
+				//
+				// URL url = s3Client.generatePresignedUrl(urlRequest);
+
+			}
+		}
+
+		if (requestCode == CAM_PIC) {
+			if (resultCode == RESULT_OK) {
+
+				selectedImageName = GeoMessenger.userId + "_"
+						+ System.currentTimeMillis();
+				selectedBitmap = (Bitmap) data.getExtras().get("data");
+
+				uploadPic.setImageBitmap(selectedBitmap);
+				uploadImageLayout.setVisibility(View.VISIBLE);
+
 			}
 		}
 	}
@@ -637,6 +798,9 @@ public class MapActivity extends GMActivity {
 	}
 
 	private void fetchUpdatedMessages() {
+		if (GeoMessenger.customerLocation == null)
+			return;
+
 		List<NameValuePair> list = new ArrayList<NameValuePair>();
 		list.add(new BasicNameValuePair("loc[]", Double
 				.toString(GeoMessenger.customerLocation.getLatitude())));

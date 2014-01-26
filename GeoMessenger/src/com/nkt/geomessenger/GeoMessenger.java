@@ -62,4 +62,11 @@ public class GeoMessenger {
 	public static int versionCode;
 	
 	public static volatile boolean isRunning;
+	
+	public static String PICTURE_BUCKET = "gmbucketdev";
+	
+	public static String getPictureBucket()
+	{
+		return PICTURE_BUCKET;
+	}
 }

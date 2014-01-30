@@ -36,11 +36,15 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.BounceInterpolator;
 import android.view.animation.Interpolator;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.actionbarsherlock.view.Menu;
@@ -79,7 +83,7 @@ import com.nkt.geomessenger.service.PollGeoMessagesService;
 import com.nkt.geomessenger.utils.Utils;
 import com.nkt.views.FlowLayout;
 
-public class MapActivity extends GMActivity {
+public class MapActivity extends GMActivity implements OnItemSelectedListener {
 
 	class UploadPicAsyncTask extends AsyncTask<String, Integer, Double> {
 
@@ -136,10 +140,10 @@ public class MapActivity extends GMActivity {
 	private CheckBox selfCheckBox;
 	private String selectedImageName;
 	private Bitmap selectedBitmap;
-	private Button albumPicUploadButton, camPicUploadButton;
 	private ImageView uploadPic;
+	private Spinner spinner;
 
-	private boolean fieldsVisible, isCentered;
+	private boolean fieldsVisible, isCentered, isMsgPublic;
 	private Hashtable<String, GeoMessage> markers = new Hashtable<String, GeoMessage>();
 
 	private static final int GET_SELECTED_FRIENDS = 1;
@@ -294,6 +298,18 @@ public class MapActivity extends GMActivity {
 		uploadImageLayout = (LinearLayout) findViewById(R.id.upload_image_layout);
 
 		uploadPic = (ImageView) findViewById(R.id.upload_pic);
+
+		spinner = (Spinner) findViewById(R.id.privacy_spinner);
+		// Create an ArrayAdapter using the string array and a default spinner
+		// layout
+		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+				this, R.array.spinner_options_array,
+				android.R.layout.simple_spinner_item);
+		// Specify the layout to use when the list of choices appears
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		// Apply the adapter to the spinner
+		spinner.setAdapter(adapter);
+		spinner.setOnItemSelectedListener(this);
 
 		saveButton.setOnClickListener(new OnClickListener() {
 
@@ -587,20 +603,24 @@ public class MapActivity extends GMActivity {
 				geoMessages.put(gm);
 			}
 
-			if (selfCheckBox.isChecked()) {
-				JSONObject gm = new JSONObject();
-				gm.put("loc", new JSONArray(Arrays.toString(loc)));
-				gm.put("message", msg);
-				gm.put("fromUserId", GeoMessenger.userId);
-				gm.put("fromUserName", "MySelf");
-				gm.put("toUserId", GeoMessenger.userId);
-				gm.put("toUserName", "MySelf");
+			JSONObject gm = new JSONObject();
+			gm.put("loc", new JSONArray(Arrays.toString(loc)));
+			gm.put("message", msg);
+			gm.put("fromUserId", GeoMessenger.userId);
+			gm.put("fromUserName", "MySelf");
+			if (!Utils.isEmpty(selectedImageName))
+				gm.put("picName", selectedImageName);
 
-				if (!Utils.isEmpty(selectedImageName))
-					gm.put("picName", selectedImageName);
-				
+			if (!isMsgPublic) {
+				if (selfCheckBox.isChecked()) {
+					gm.put("toUserId", GeoMessenger.userId);
+					gm.put("toUserName", "MySelf");
+					geoMessages.put(gm);
+				}
+			} else {
+				gm.put("toUserId", "public");
+				gm.put("toUserName", "public");
 				geoMessages.put(gm);
-
 			}
 
 			jsonObjectRequest.put("geo_messages", geoMessages);
@@ -650,7 +670,7 @@ public class MapActivity extends GMActivity {
 		sourceSelection.setSingleChoiceItems(items, -1,
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int item) {
-						if (item ==1)
+						if (item == 1)
 							albumPic();
 						else
 							camPic();
@@ -841,5 +861,33 @@ public class MapActivity extends GMActivity {
 			hideFields();
 		} else
 			super.onBackPressed();
+	}
+
+	public void onItemSelected(AdapterView<?> parent, View view, int pos,
+			long id) {
+		if (pos == 1) {
+			isMsgPublic = false;
+			showFriendsPicker(view);
+			friendsPickerLayout.setVisibility(View.VISIBLE);
+			selfCheckBox.setVisibility(View.VISIBLE);
+			selfCheckBox.setChecked(false);
+		} else if (pos == 2) {
+			isMsgPublic = false;
+			selfCheckBox.setVisibility(View.VISIBLE);
+			GeoMessenger.getSelectedUsers().clear();
+			friendsPickerLayout.setVisibility(View.GONE);
+			selfCheckBox.setVisibility(View.GONE);
+			selfCheckBox.setChecked(true);
+		} else {
+			isMsgPublic = true;
+			GeoMessenger.getSelectedUsers().clear();
+			friendsPickerLayout.setVisibility(View.GONE);
+			selfCheckBox.setVisibility(View.GONE);
+			selfCheckBox.setChecked(false);
+		}
+	}
+
+	public void onNothingSelected(AdapterView<?> parent) {
+		// Another interface callback
 	}
 }

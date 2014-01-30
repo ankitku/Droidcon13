@@ -51,6 +51,13 @@
     <string name="error_dialog_default_text">No response from server.</string>
     <string name="exception">Exception: %1$s</string>
     <string name="okay">OK</string>
+
+    <string-array name="spinner_options_array">
+        <item>Public</item>
+        <item>Friends</item>
+        <item>Self</item>
+    </string-array>
+
     <string name="app_id">1430458327171049</string>
 
 </resources>

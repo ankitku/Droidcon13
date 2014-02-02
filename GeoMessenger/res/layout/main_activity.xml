@@ -33,7 +33,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:visibility="visible" >
+                android:visibility="gone" >
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -104,6 +104,14 @@
                     </Button>
                 </LinearLayout>
 
+                <RatingBar
+                    android:id="@+id/rating_bar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:numStars="5"
+                    android:visibility="gone" />
+
                 <RelativeLayout
                     android:layout_width="fill_parent"
                     android:layout_height="50dp"
@@ -131,11 +139,12 @@
             <Button
                 android:id="@+id/btn_save"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="40dp"
                 android:layout_gravity="bottom"
                 android:layout_weight="0"
                 android:background="@color/blue"
-                android:text="@string/btn_save" />
+                android:drawablePadding="15dp"
+                android:drawableTop="@drawable/ic_menu_compose" />
         </LinearLayout>
     </RelativeLayout>
 

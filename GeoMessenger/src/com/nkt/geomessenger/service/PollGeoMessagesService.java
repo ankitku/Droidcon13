@@ -62,7 +62,7 @@ public class PollGeoMessagesService extends IntentService {
 			list.add(new BasicNameValuePair("loc[]", Double
 					.toString(GeoMessenger.customerLocation.getLongitude())));
 			list.add(new BasicNameValuePair("user_id", GeoMessenger.userId));
-			list.add(new BasicNameValuePair("radius_in_metres", "1000"));
+			list.add(new BasicNameValuePair("radius_in_metres", "10000"));
 
 			JsonObjectRequest jsonGeoMessagesRequest = new JsonObjectRequest(
 					Method.GET, Utils.getFilledUrl(

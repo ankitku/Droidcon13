@@ -34,5 +34,7 @@ public class GeoMessengerApplication extends Application {
 	    // Initialize.
 	    Crittercism.initialize(getApplicationContext(),
 	        "52de3c6846b7c24fb2000007", config);
+	    
+	    GeoMessenger.isFirstTime = true;
 	}
 }

@@ -63,6 +63,8 @@ public class GeoMessenger {
 	
 	public static volatile boolean isRunning;
 	
+	public static boolean isFirstTime;
+	
 	public static String PICTURE_BUCKET = "gmbucketdev";
 	
 	public static String getPictureBucket()

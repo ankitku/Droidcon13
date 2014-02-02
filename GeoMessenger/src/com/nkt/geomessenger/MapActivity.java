@@ -44,6 +44,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RatingBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -142,6 +143,7 @@ public class MapActivity extends GMActivity implements OnItemSelectedListener {
 	private Bitmap selectedBitmap;
 	private ImageView uploadPic;
 	private Spinner spinner;
+	private RatingBar ratingBar;
 
 	private boolean fieldsVisible, isCentered, isMsgPublic;
 	private Hashtable<String, GeoMessage> markers = new Hashtable<String, GeoMessage>();
@@ -298,6 +300,7 @@ public class MapActivity extends GMActivity implements OnItemSelectedListener {
 		uploadImageLayout = (LinearLayout) findViewById(R.id.upload_image_layout);
 
 		uploadPic = (ImageView) findViewById(R.id.upload_pic);
+		ratingBar = (RatingBar) findViewById(R.id.rating_bar);
 
 		spinner = (Spinner) findViewById(R.id.privacy_spinner);
 		// Create an ArrayAdapter using the string array and a default spinner
@@ -378,6 +381,8 @@ public class MapActivity extends GMActivity implements OnItemSelectedListener {
 
 			initAnimations();
 		}
+
+		isMsgPublic = true;
 	}
 
 	@Override
@@ -441,6 +446,9 @@ public class MapActivity extends GMActivity implements OnItemSelectedListener {
 
 			LatLng p = new LatLng(gm.getLoc()[0], gm.getLoc()[1]);
 
+			if (GeoMessenger.isFirstTime)
+				loadImage(gm.getFromUserPic(), null);
+
 			final Marker m = mapFragment
 					.addMarker(new MarkerOptions()
 							.position(p)
@@ -457,6 +465,9 @@ public class MapActivity extends GMActivity implements OnItemSelectedListener {
 
 			markers.put(m.getId(), gm);
 		}
+
+		if (GeoMessenger.isFirstTime)
+			GeoMessenger.isFirstTime = false;
 	}
 
 	private void animateMarker(final Marker marker) {
@@ -524,7 +535,7 @@ public class MapActivity extends GMActivity implements OnItemSelectedListener {
 					}
 				});
 			}
-		}, 400);
+		}, 200);
 	}
 
 	public void hideFields() {
@@ -549,7 +560,7 @@ public class MapActivity extends GMActivity implements OnItemSelectedListener {
 					}
 				});
 			}
-		}, 400);
+		}, 200);
 	}
 
 	public void showFriendsPicker(View v) {
@@ -596,7 +607,9 @@ public class MapActivity extends GMActivity implements OnItemSelectedListener {
 				gm.put("fromUserName", GeoMessenger.userName);
 				gm.put("toUserId", g.getId());
 				gm.put("toUserName", g.getName());
-
+				
+				if(ratingBar.isShown())
+					gm.put("rating", ratingBar.getRating());
 				if (!Utils.isEmpty(selectedImageName))
 					gm.put("picName", selectedImageName);
 
@@ -608,6 +621,9 @@ public class MapActivity extends GMActivity implements OnItemSelectedListener {
 			gm.put("message", msg);
 			gm.put("fromUserId", GeoMessenger.userId);
 			gm.put("fromUserName", "MySelf");
+			
+			if(ratingBar.isShown())
+				gm.put("rating", ratingBar.getRating());
 			if (!Utils.isEmpty(selectedImageName))
 				gm.put("picName", selectedImageName);
 
@@ -865,25 +881,36 @@ public class MapActivity extends GMActivity implements OnItemSelectedListener {
 
 	public void onItemSelected(AdapterView<?> parent, View view, int pos,
 			long id) {
-		if (pos == 1) {
+		if (pos == 2) {
 			isMsgPublic = false;
 			showFriendsPicker(view);
 			friendsPickerLayout.setVisibility(View.VISIBLE);
 			selfCheckBox.setVisibility(View.VISIBLE);
 			selfCheckBox.setChecked(false);
-		} else if (pos == 2) {
+			ratingBar.setVisibility(View.GONE);
+		} else if (pos == 3) {
 			isMsgPublic = false;
 			selfCheckBox.setVisibility(View.VISIBLE);
 			GeoMessenger.getSelectedUsers().clear();
 			friendsPickerLayout.setVisibility(View.GONE);
 			selfCheckBox.setVisibility(View.GONE);
 			selfCheckBox.setChecked(true);
+			ratingBar.setVisibility(View.GONE);
+		} else if (pos == 0) {
+			isMsgPublic = true;
+			GeoMessenger.getSelectedUsers().clear();
+			friendsPickerLayout.setVisibility(View.GONE);
+			selfCheckBox.setVisibility(View.GONE);
+			selfCheckBox.setChecked(false);
+			ratingBar.setVisibility(View.GONE);
 		} else {
 			isMsgPublic = true;
 			GeoMessenger.getSelectedUsers().clear();
 			friendsPickerLayout.setVisibility(View.GONE);
 			selfCheckBox.setVisibility(View.GONE);
 			selfCheckBox.setChecked(false);
+			ratingBar.setVisibility(View.VISIBLE);
+			ratingBar.setRating(0f);
 		}
 	}
 

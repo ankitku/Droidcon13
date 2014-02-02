@@ -20,6 +20,14 @@
         android:textColor="@color/grey"
         android:textSize="22sp" />
 
+    <RatingBar
+        android:id="@+id/rating_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:numStars="5" 
+        android:visibility="gone"/>
+
     <ImageView
         android:id="@+id/pic"
         android:layout_width="fill_parent"

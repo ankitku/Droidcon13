@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -32,6 +33,7 @@ public class MessageDetailsActivity extends GMActivity {
 	private TextView fromText, toText, messageText, timeText;
 	private ImageView messagePic;
 	private boolean isSent;
+	private RatingBar ratingBar;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +47,7 @@ public class MessageDetailsActivity extends GMActivity {
 		messageText = (TextView) findViewById(R.id.messageText);
 		timeText = (TextView) findViewById(R.id.timeText);
 		messagePic = (ImageView) findViewById(R.id.pic);
+		ratingBar = (RatingBar) findViewById(R.id.rating_bar);
 
 		// if message is FOR me, then send ack
 		if (Utils.isEmpty(GeoMessenger.selectedGeoMessage.getToUserName()))
@@ -121,6 +124,11 @@ public class MessageDetailsActivity extends GMActivity {
 			toText.setText("To: " + entry.getToUserName());
 		else
 			fromText.setText("From: " + entry.getFromUserName());
+
+		if (entry.getRating() > 0) {
+			ratingBar.setRating(entry.getRating());
+			ratingBar.setVisibility(View.VISIBLE);
+		}
 
 		if (!Utils.isEmpty(entry.getPicName())) {
 			AmazonS3Client s3Client = new AmazonS3Client(

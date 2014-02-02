@@ -52,8 +52,9 @@ public class GMActivity extends SherlockFragmentActivity {
 
 	private CharSequence mDrawerTitle;
 	private CharSequence mTitle;
-	
-	private String childActivities[] = { "LoginActivity", "MessageDetailsActivity" };
+
+	private String childActivities[] = { "LoginActivity",
+			"MessageDetailsActivity" };
 	private List<String> childActivitiesList = Arrays.asList(childActivities);
 
 	private static final Uri M_FACEBOOK_URL = Uri
@@ -74,14 +75,14 @@ public class GMActivity extends SherlockFragmentActivity {
 	protected void onResume() {
 		super.onResume();
 
-		 GeoMessenger.isRunning = true;
+		GeoMessenger.isRunning = true;
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
 
-		 GeoMessenger.isRunning = false;
+		GeoMessenger.isRunning = false;
 	}
 
 	public String getActivityLabel() {
@@ -160,13 +161,13 @@ public class GMActivity extends SherlockFragmentActivity {
 			}
 		};
 		mDrawerToggle.setDrawerIndicatorEnabled(true);
-		
+
 		if (childActivitiesList.contains(getActivityLabel())) {
 			mDrawerToggle.setDrawerIndicatorEnabled(false);
 			mDrawerLayout
 					.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 		}
-		
+
 		mDrawerLayout.setDrawerListener(mDrawerToggle);
 	}
 
@@ -241,7 +242,8 @@ public class GMActivity extends SherlockFragmentActivity {
 
 		@Override
 		protected Boolean doInBackground(Void... arg0) {
-			Session.getActiveSession().closeAndClearTokenInformation();
+			if (Session.getActiveSession() != null)
+				Session.getActiveSession().closeAndClearTokenInformation();
 			return true;
 		}
 
@@ -359,16 +361,22 @@ public class GMActivity extends SherlockFragmentActivity {
 				DISK_IMAGECACHE_QUALITY);
 	}
 
-	protected void loadImage(String imageUrl, final ImageView iv) {
+	protected void loadImage(final String imageUrl, final ImageView iv) {
 		ImageCacheManager.getInstance().getImage(imageUrl, new ImageListener() {
 
 			@Override
 			public void onErrorResponse(VolleyError error) {
+				if(iv == null)
+					return;
+				
 				iv.setImageResource(R.drawable.placeholder_contact);
 			}
 
 			@Override
 			public void onResponse(ImageContainer response, boolean isImmediate) {
+				if(iv == null)
+					return;
+				
 				iv.setImageBitmap(response.getBitmap());
 			}
 		});

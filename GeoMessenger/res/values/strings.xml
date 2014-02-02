@@ -53,7 +53,8 @@
     <string name="okay">OK</string>
 
     <string-array name="spinner_options_array">
-        <item>Public</item>
+        <item>Classified Ad</item>
+        <item>Recommendation</item>
         <item>Friends</item>
         <item>Self</item>
     </string-array>

@@ -14,6 +14,10 @@ public class GeoMessage extends GsonConvertibleObject {
 	private String toUserName;
 	private String toUserId;
 
+	public String getToUserId() {
+		return toUserId;
+	}
+
 	private float rating;
 	private boolean seen;
 

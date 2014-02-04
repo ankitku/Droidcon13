@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -34,6 +35,7 @@ public class MessageDetailsActivity extends GMActivity {
 	private ImageView messagePic;
 	private boolean isSent;
 	private RatingBar ratingBar;
+	private Button delButton;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -48,12 +50,14 @@ public class MessageDetailsActivity extends GMActivity {
 		timeText = (TextView) findViewById(R.id.timeText);
 		messagePic = (ImageView) findViewById(R.id.pic);
 		ratingBar = (RatingBar) findViewById(R.id.rating_bar);
+		delButton = (Button) findViewById(R.id.del_button);
 
 		// if message is FOR me, then send ack
-		if (Utils.isEmpty(GeoMessenger.selectedGeoMessage.getToUserName()))
+		if (GeoMessenger.userId.equals(GeoMessenger.selectedGeoMessage
+				.getToUserId()))
 			sendAck();
-		else
-			isSent = true;
+		
+		isSent = getIntent().getBooleanExtra("isSent", false);
 
 		populateViews();
 	}
@@ -125,12 +129,16 @@ public class MessageDetailsActivity extends GMActivity {
 		else
 			fromText.setText("From: " + entry.getFromUserName());
 
+		if ("public".equalsIgnoreCase(entry.getToUserId()) && !isSent)
+			delButton.setVisibility(View.GONE);
+
 		if (entry.getRating() > 0) {
 			ratingBar.setRating(entry.getRating());
 			ratingBar.setVisibility(View.VISIBLE);
 		}
 
 		if (!Utils.isEmpty(entry.getPicName())) {
+			messagePic.setVisibility(View.VISIBLE);
 			AmazonS3Client s3Client = new AmazonS3Client(
 					new BasicAWSCredentials(Constants.A_A_K, Constants.A_S_K));
 

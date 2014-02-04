@@ -172,7 +172,7 @@ public class MapActivity extends GMActivity implements OnItemSelectedListener {
 		}
 	};
 
-	protected MenuItem action_signout, menu_legalnotices;
+	protected MenuItem action_signout;
 
 	protected GoogleMap mapFragment;
 	Animation animateBottomViewOut, animateBottomViewIn;
@@ -446,8 +446,7 @@ public class MapActivity extends GMActivity implements OnItemSelectedListener {
 
 			LatLng p = new LatLng(gm.getLoc()[0], gm.getLoc()[1]);
 
-			if (GeoMessenger.isFirstTime)
-				loadImage(gm.getFromUserPic(), null);
+			loadImage(gm.getFromUserPic(), null);
 
 			final Marker m = mapFragment
 					.addMarker(new MarkerOptions()
@@ -513,7 +512,7 @@ public class MapActivity extends GMActivity implements OnItemSelectedListener {
 
 			@Override
 			public void onClick(View v) {
-				if (selectedImageName == null)
+				if (Utils.isEmpty(selectedImageName))
 					sendMessage();
 				else
 					(new UploadPicAsyncTask()).execute();
@@ -591,6 +590,17 @@ public class MapActivity extends GMActivity implements OnItemSelectedListener {
 		mProgress.setVisibility(View.VISIBLE);
 
 		String msg = messageText.getText().toString();
+		if(Utils.isEmpty(msg))
+		{
+			new AlertDialog.Builder(MapActivity.this).setTitle("Empty message")
+			.setMessage("Can't save empty message!")
+			.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.cancel();
+				}
+			}).show();
+			return;
+		}
 
 		JSONObject jsonObjectRequest = new JSONObject();
 
@@ -607,8 +617,8 @@ public class MapActivity extends GMActivity implements OnItemSelectedListener {
 				gm.put("fromUserName", GeoMessenger.userName);
 				gm.put("toUserId", g.getId());
 				gm.put("toUserName", g.getName());
-				
-				if(ratingBar.isShown())
+
+				if (ratingBar.isShown())
 					gm.put("rating", ratingBar.getRating());
 				if (!Utils.isEmpty(selectedImageName))
 					gm.put("picName", selectedImageName);
@@ -621,8 +631,8 @@ public class MapActivity extends GMActivity implements OnItemSelectedListener {
 			gm.put("message", msg);
 			gm.put("fromUserId", GeoMessenger.userId);
 			gm.put("fromUserName", "MySelf");
-			
-			if(ratingBar.isShown())
+
+			if (ratingBar.isShown())
 				gm.put("rating", ratingBar.getRating());
 			if (!Utils.isEmpty(selectedImageName))
 				gm.put("picName", selectedImageName);
@@ -860,7 +870,6 @@ public class MapActivity extends GMActivity implements OnItemSelectedListener {
 		MenuInflater inflater = getSupportMenuInflater();
 		inflater.inflate(R.menu.action_main, menu);
 		action_signout = (MenuItem) menu.findItem(R.id.action_signout);
-		menu_legalnotices = (MenuItem) menu.findItem(R.id.menu_legalnotices);
 		return true;
 	}
 

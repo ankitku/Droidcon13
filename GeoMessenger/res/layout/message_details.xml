@@ -31,8 +31,9 @@
     <ImageView
         android:id="@+id/pic"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp" />
+        android:layout_height="200dp"
+        android:layout_margin="10dp" 
+        android:visibility="gone"/>
 
     <TextView
         android:id="@+id/messageText"
@@ -51,6 +52,7 @@
         android:textSize="16sp" />
 
     <Button
+        android:id="@+id/del_button"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"

@@ -127,6 +127,7 @@ public class MessagesActivity extends GMActivity {
 						GeoMessenger.selectedGeoMessage = entry;
 						Intent intent = new Intent(MessagesActivity.this,
 								MessageDetailsActivity.class);
+						intent.putExtra("isSent", true);
 						startActivity(intent);
 					}
 				});

@@ -179,6 +179,10 @@ public class GMActivity extends SherlockFragmentActivity {
 			startActivity(intent);
 			break;
 		}
+		case INVITE_FRIENDS:{
+			inviteFriends();
+			break;
+		}
 		case FEEDBACK:
 			sendFeedback();
 
@@ -215,15 +219,7 @@ public class GMActivity extends SherlockFragmentActivity {
 			async.execute();
 			break;
 		}
-		case R.id.menu_legalnotices: {
-			String LicenseInfo = "HI";
-			AlertDialog.Builder LicenseDialog = new AlertDialog.Builder(
-					GMActivity.this);
-			LicenseDialog.setTitle("Legal Notices");
-			LicenseDialog.setMessage(LicenseInfo);
-			LicenseDialog.show();
-			return true;
-		}
+
 		case android.R.id.home:
 			if (mDrawerToggle.isDrawerIndicatorEnabled()) {
 				if (mDrawerLayout.isDrawerOpen(mDrawerList)) {
@@ -280,6 +276,16 @@ public class GMActivity extends SherlockFragmentActivity {
 						+ " running Android " + androidVersion + " user_id : "
 						+ GeoMessenger.userId);
 
+		intent.setType("plain/text");
+		startActivity(Intent.createChooser(intent, "Send your email from:"));
+	}
+	
+	public void inviteFriends() {
+		Intent intent = new Intent(android.content.Intent.ACTION_SEND);
+		intent.putExtra(Intent.EXTRA_SUBJECT, "Invitation to join GeoMessenger");
+
+		intent.putExtra(Intent.EXTRA_TEXT,
+				"Download the new GeoMessenger app from Google play store link->");
 		intent.setType("plain/text");
 		startActivity(Intent.createChooser(intent, "Send your email from:"));
 	}
@@ -342,8 +348,10 @@ public class GMActivity extends SherlockFragmentActivity {
 				// an unknown issue occurred, this could be a code error, or
 				// a server side issue, log the issue, and either ask the
 				// user to retry, or file a bug
-				dialogBody = getString(R.string.error_unknown,
-						error.getErrorMessage());
+				//dialogBody = getString(R.string.error_unknown,
+				//		error.getErrorMessage());
+				LogoutAsync async = new LogoutAsync();
+				async.execute();
 				break;
 			}
 		}

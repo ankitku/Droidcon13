@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item name="blue" type="color">#FF33B5E5</item>
+    <item name="purple" type="color">#FFAA66CC</item>
+    <item name="green" type="color">#FF99CC00</item>
+    <item name="orange" type="color">#FFFFBB33</item>
+    <item name="red" type="color">#FFFF4444</item>
+    <item name="darkblue" type="color">#FF0099CC</item>
+    <item name="darkpurple" type="color">#FF9933CC</item>
+    <item name="darkgreen" type="color">#FF669900</item>
+    <item name="darkorange" type="color">#FFFF8800</item>
+    <item name="darkred" type="color">#FFCC0000</item>
+
+    <color name="material_deep_teal_200">#ff80cbc4</color>
+    <color name="material_deep_teal_500">#ff009688</color>
+    <color name="material_blue_grey_800">#ff37474f</color>
+    <color name="material_blue_grey_900">#ff263238</color>
+    <color name="material_blue_grey_950">#ff21272b</color>
+
+    <color name="indigo_50">#e8eaf6</color>
+    <color name="indigo_100">#c5cae9</color>
+    <color name="indigo_200">#9fa8da</color>
+    <color name="indigo_300">#7986cb</color>
+    <color name="indigo_400">#5c6bc0</color>
+    <color name="indigo_500">#3f51b5</color>
+    <color name="indigo_600">#3949ab</color>
+    <color name="indigo_700">#303f9f</color>
+    <color name="indigo_800">#283593</color>
+    <color name="indigo_900">#1a237e</color>
+    <color name="indigo_A100">#8c9eff</color>
+    <color name="indigo_A200">#536dfe</color>
+    <color name="indigo_A400">#3d5afe</color>
+    <color name="indigo_A700">#304ffe</color>
+
+
+    <color name="fab_color_1">#ff5252</color>
+    <color name="fab_color_1_muted">#ff8080</color>
+    <color name="fab_color_2">#9c27b0</color>
+    <color name="fab_color_2_muted">#a56ab0</color>
+
+    <item name="primary" type="color">@color/indigo_500</item>
+    <item name="primary_dark" type="color">@color/indigo_900</item>
+    <item name="accent" type="color">@color/fab_material_white</item>
+
+
+    <integer-array name="androidcolors">
+        <item>@color/blue</item>
+        <item>@color/purple</item>
+        <item>@color/green</item>
+        <item>@color/orange</item>
+        <item>@color/red</item>
+        <item>@color/darkblue</item>
+        <item>@color/darkpurple</item>
+        <item>@color/darkgreen</item>
+        <item>@color/darkorange</item>
+        <item>@color/darkred</item>
+    </integer-array>
+
+</resources> 

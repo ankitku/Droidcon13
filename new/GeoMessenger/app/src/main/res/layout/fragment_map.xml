@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:orientation="vertical" xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+<com.google.android.gms.maps.MapView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/mapView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+
+    <com.software.shell.fab.ActionButton xmlns:fab="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/action_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="@dimen/fab_margin"
+        android:layout_marginBottom="@dimen/fab_margin"
+        fab:type="DEFAULT"
+        fab:button_color="@color/fab_material_indigo_500"
+        fab:button_colorPressed="@color/fab_material_indigo_900"
+        fab:image="@drawable/fab_plus_icon"
+        fab:image_size="24dp"
+        fab:shadow_color="#757575"
+        fab:shadow_radius="1.0dp"
+        fab:shadow_xOffset="0.5dp"
+        fab:shadow_yOffset="1.0dp"
+        fab:stroke_color="@color/fab_material_deep_purple_500"
+        fab:stroke_width="1.0dp"
+        fab:button_colorRipple="@color/fab_material_purple_500"
+        fab:rippleEffect_enabled="true"
+        fab:shadowResponsiveEffect_enabled="true"
+        fab:show_animation="@anim/fab_roll_from_down"
+        fab:hide_animation="@anim/fab_roll_to_down"
+        />
+
+</RelativeLayout>
